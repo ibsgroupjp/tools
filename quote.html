@@ -184,8 +184,8 @@
           <div class="q">Q1. 求める関わり方は？</div>
           <div class="opts">
             <label class="opt"><input type="radio" name="kanyo" value="4"><span>参謀型<br><small style="font-weight:400;">創業・承継・再生。常時助言・先回り提案・経営参謀</small></span></label>
-            <label class="opt"><input type="radio" name="kanyo" value="2" checked><span>パートナー型<br><small style="font-weight:400;">定期面談で相談でき、自社を理解した提案</small></span></label>
-            <label class="opt"><input type="radio" name="kanyo" value="0"><span>情報・照会型<br><small style="font-weight:400;">照会・セカンドオピニオン、情報を受け自分で</small></span></label>
+            <label class="opt"><input type="radio" name="kanyo" value="2"><span>パートナー型<br><small style="font-weight:400;">定期面談で相談でき、自社を理解した提案</small></span></label>
+            <label class="opt"><input type="radio" name="kanyo" value="0" checked><span>情報・照会型<br><small style="font-weight:400;">照会・セカンドオピニオン、情報を受け自分で</small></span></label>
           </div>
         </div>
 
@@ -193,8 +193,8 @@
           <div class="q">Q2. 費用感は？</div>
           <div class="opts">
             <label class="opt"><input type="radio" name="hiyo" value="4"><span>最良志向<br><small style="font-weight:400;">費用がかかっても最良の提案・ハイパフォーマンス</small></span></label>
-            <label class="opt"><input type="radio" name="hiyo" value="2" checked><span>バランス<br><small style="font-weight:400;">費用と提案のベストバランス・高コスパ</small></span></label>
-            <label class="opt"><input type="radio" name="hiyo" value="0"><span>コスト重視<br><small style="font-weight:400;">安くしつつ情報はしっかり</small></span></label>
+            <label class="opt"><input type="radio" name="hiyo" value="2"><span>バランス<br><small style="font-weight:400;">費用と提案のベストバランス・高コスパ</small></span></label>
+            <label class="opt"><input type="radio" name="hiyo" value="0" checked><span>コスト重視<br><small style="font-weight:400;">安くしつつ情報はしっかり</small></span></label>
           </div>
         </div>
 
@@ -202,8 +202,8 @@
           <div class="q">Q3. 面談の頻度は？<small>フェロー＝毎月／パートナー＝隔月が標準</small></div>
           <div class="opts">
             <label class="opt"><input type="radio" name="mendan" value="4"><span>毎月しっかり</span></label>
-            <label class="opt"><input type="radio" name="mendan" value="2" checked><span>隔月でよい</span></label>
-            <label class="opt"><input type="radio" name="mendan" value="0"><span>定期面談はなし</span></label>
+            <label class="opt"><input type="radio" name="mendan" value="2"><span>隔月でよい</span></label>
+            <label class="opt"><input type="radio" name="mendan" value="0" checked><span>定期面談はなし</span></label>
           </div>
         </div>
 
@@ -256,7 +256,7 @@
 
       <div id="gateMsg">下記の「お客様情報」（会社名・ご担当者名・お電話番号またはメール）をご入力のうえ、<br>下の <b>［📨 この内容で結果を見る（送信）］</b> を押すと、概算お見積もりが表示されます。</div>
       <div id="resultInner">
-      <div id="thanks" class="thanks no-print" style="display:none;">送信ありがとうございました。内容をIBS担当にお送りしました。後ほどご連絡いたします。下記が概算のお見積もりです。</div>
+      <div id="thanks" class="thanks no-print" style="display:none;">送信ありがとうございました。内容をIBS担当にお送りしました。後ほどご連絡いたします。概算結果はご入力のメールアドレスにもお送りしました。下記が概算のお見積もりです。</div>
       <div class="reco-banner">
         診断結果：あなたへのおすすめは <b id="recoName">パートナー顧問</b> です。<span id="recoReason"></span>
       </div>
@@ -288,8 +288,8 @@
 
   <div class="btnbar no-print">
     <button class="btn submit" id="btnSubmit" onclick="submitQuote()" style="display:none;">📨 この内容で結果を見る（送信）</button>
-    <button class="btn print" onclick="window.print()">🖨 印刷／PDFで保存</button>
-    <button class="btn dl" onclick="downloadResult()">⬇ 結果をダウンロード</button>
+    <button class="btn print" onclick="window.print()" style="display:none">🖨 印刷／PDFで保存</button>
+    <button class="btn dl" onclick="downloadResult()" style="display:none">⬇ 結果をダウンロード</button>
     <button class="btn reset" onclick="location.reload()">入力をリセット</button>
   </div>
 
@@ -380,13 +380,13 @@ function calc(){
   var rowOrder=['fellow','partner','support'];
   function star(t){ var d=Math.abs(META[t].target-tierScore); var n=(d<=0.7)?3:(d<=1.7)?2:1; var s=''; for(var i=0;i<3;i++)s+=(i<n?'★':'☆'); return s; }
   var html='<thead><tr><th>顧問区分</th>'+COLS.map(c=>'<th>'+c.name+'<small>'+c.sub+'</small></th>').join('')+'</tr></thead><tbody>';
-  rowOrder.forEach(function(t){
+  var recoMonthly=0; rowOrder.forEach(function(t){
     var isReco=(t===recoTier);
     html+='<tr class="'+(isReco?'recorow':'')+'">';
     html+='<td class="rh">'+(isReco?'<span class="rib">★おすすめ</span>':'')+META[t].name+'<small>'+META[t].sub+' <span class="stars">'+star(t)+'</span></small></td>';
     COLS.forEach(function(c){
       var total=komonFee(t,c.key,kHead)+kyuyoFee(c.key,qHead);
-      var diag=(isReco && c.key===recoCol);
+      var diag=(isReco && c.key===recoCol); if(diag){recoMonthly=total;}
       html+='<td class="cell'+(diag?' diag':'')+'">¥'+yen(total)+'<span class="u">/月</span>'+(diag?'<span class="dg">◎ご回答に最適</span>':'')+'</td>';
     });
     html+='</tr>';
@@ -428,7 +428,7 @@ function calc(){
   if(tt==='jisha') memo.push('手続きは自社・他社＝当社手続きなし');
   if(dcWant) memo.push('DC関心：顧問ありは顧問内対応／DCのみは単独DC顧問でアップセル');
   document.getElementById('memo')&&'';var _hpmemo='<div class="mh">📝 正田さん用メモ（印刷されません）</div><ul>'+memo.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
-  window.LAST={kHead:kHead,qHead:qHead,recoTier:META[recoTier].name,recoCol:recoCol,tierScore:Math.round(tierScore*100)/100};
+  window.LAST={kHead:kHead,qHead:qHead,recoTier:META[recoTier].name,recoCol:recoCol,recoColName:(COLS.find(c=>c.key===recoCol)||{}).name||recoCol,recoMonthly:recoMonthly,tierScore:Math.round(tierScore*100)/100};
 }
 
 (function(){var d=new Date();document.getElementById('pdate').textContent=d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate();})();
@@ -445,7 +445,7 @@ function buildPayload(){
     headcount:{yakuin:num('p_yakuin'),jugyo:num('p_jugyo'),part:num('p_part'),ukeoi:num('p_ukeoi')},
     kHead:(window.LAST||{}).kHead, qHead:(window.LAST||{}).qHead,
     answers:{kanyo:vR('kanyo'),hiyo:vR('hiyo'),mendan:vR('mendan'),tetsuzuki:vR('tetsuzuki'),kyuyo:vR('kyuyo')},
-    needs:needs, reco:{tier:(window.LAST||{}).recoTier,col:(window.LAST||{}).recoCol} };
+    needs:needs, reco:{tier:(window.LAST||{}).recoTier,col:(window.LAST||{}).recoCol,colName:(window.LAST||{}).recoColName,monthly:(window.LAST||{}).recoMonthly} };
 }
 function submitQuote(){
   if(!contactOK()){ alert('お電話番号またはメールアドレスをご入力ください。'); return; }
