@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IBS 診断フォーム</title>
+<!--
+  IBS 診断フォーム（診断返し型磁石 共通・S4-K2）
+  ・URLパラメータ ?m= で磁石を切替: kyuyo-rakuraku / joseikin-rakuraku / keiei-kenshin
+    （saiyo-rakuraku はGAS受け口のみ実装済み・本フォームでは「準備中」表示＝第4弾判定まで封印）
+  ・送信先=S4捕捉フォームGAS（同一デプロイ）。answers{q1..q20}＋TEL付きでPOST。
+  ・TEL・会社名（屋号可）=必須＝高関与B2Bの本気度フィルタ。
+  ・event_id/fbp/fbc同梱=S13-CAPI重複排除と同型（iframe設置時はfbp/fbcが取れないことがあるが、
+    CAPI側はメールhashで名寄せされるため欠けても送信は成立する）。
+  ・Jimdo設置=iframe埋め込み。親ページ側スニペット（見積ナビと同型・自動リサイズ）:
+    <iframe id="ibs-shindan" src="【本ファイルの公開URL】?m=kyuyo-rakuraku" style="width:100%;border:none" scrolling="no"></iframe>
+    <script>window.addEventListener('message',function(e){ if(e.data&&e.data.ibsShindanHeight){ document.getElementById('ibs-shindan').style.height=(e.data.ibsShindanHeight+20)+'px'; } });</script>
+-->
+<style>
+  :root{ --navy:#002060; --cyan:#0098E0; --gold:#FFC000; --ink:#333333; --pale:#EAF6FD; --line:#C9DCE8; --err:#c0392b; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{ font-family:"Yu Gothic","游ゴシック",YuGothic,Meiryo,sans-serif; color:var(--ink); background:#fff; line-height:1.7; }
+  .wrap{ max-width:720px; margin:0 auto; padding:8px 14px 28px; }
+  .head{ background:var(--navy); color:#fff; border-radius:10px; padding:18px 20px; margin-bottom:14px; }
+  .head .badge{ display:inline-block; background:var(--gold); color:var(--navy); font-weight:800; font-size:12px; padding:2px 12px; border-radius:3px; margin-bottom:6px; }
+  .head h1{ font-size:22px; line-height:1.4; }
+  .head p{ font-size:13px; color:#CFE6F7; margin-top:4px; }
+  .sec-t{ background:var(--navy); color:#fff; font-weight:700; font-size:14px; padding:6px 12px; border-radius:6px 6px 0 0; margin-top:18px; }
+  .qbox{ border:1px solid var(--line); border-top:none; border-radius:0 0 6px 6px; }
+  .q{ padding:10px 12px; border-bottom:1px solid var(--line); }
+  .q:last-child{ border-bottom:none; }
+  .q .qt{ font-size:14px; font-weight:700; color:var(--navy); margin-bottom:6px; }
+  .q .qt .no{ color:var(--cyan); font-style:italic; margin-right:6px; }
+  .opts{ display:flex; flex-wrap:wrap; gap:6px; }
+  .opts label{ display:inline-flex; align-items:center; gap:4px; border:1.5px solid var(--line); border-radius:999px; padding:5px 14px; font-size:13px; cursor:pointer; user-select:none; }
+  .opts input{ accent-color:var(--cyan); }
+  .opts label:has(input:checked){ border-color:var(--cyan); background:var(--pale); font-weight:700; }
+  .yn .opts label{ min-width:84px; justify-content:center; font-weight:700; }
+  input[type=text],input[type=tel],input[type=email]{ width:100%; border:1.5px solid var(--line); border-radius:6px; padding:9px 12px; font-size:15px; font-family:inherit; }
+  input:focus{ outline:2px solid var(--cyan); border-color:var(--cyan); }
+  .field{ margin-top:12px; }
+  .field .fl{ display:block; font-size:13px; font-weight:700; color:var(--navy); margin-bottom:3px; }
+  .field .fl .req{ color:var(--err); font-size:11px; margin-left:6px; }
+  .field .fl .opt{ color:#888; font-size:11px; margin-left:6px; font-weight:400; }
+  .consent{ display:flex; gap:8px; align-items:flex-start; font-size:12.5px; margin-top:14px; background:var(--pale); border-radius:6px; padding:10px 12px; }
+  .consent input{ margin-top:4px; accent-color:var(--cyan); }
+  .err{ color:var(--err); font-size:12px; display:none; margin-top:3px; }
+  .top-err{ display:none; background:#FDEDEC; color:var(--err); border:1px solid var(--err); border-radius:6px; padding:9px 12px; font-size:13px; margin-top:12px; }
+  .submit{ display:block; width:100%; margin-top:16px; background:var(--gold); color:var(--navy); border:none; border-radius:999px; font-family:inherit; font-size:17px; font-weight:800; padding:14px; cursor:pointer; }
+  .submit:disabled{ opacity:.6; cursor:default; }
+  .submit small{ display:block; font-size:11px; font-weight:700; }
+  .priv{ font-size:11px; color:#777; margin-top:10px; }
+  .hp{ position:absolute; left:-9999px; top:-9999px; height:1px; overflow:hidden; }
+  .thanks{ display:none; text-align:center; padding:36px 16px; }
+  .done .thanks{ display:block; }
+  .done form, .done .head p{ display:none; }
+  .thanks .ic{ width:52px; height:52px; border-radius:50%; background:var(--cyan); margin:0 auto 12px; display:flex; align-items:center; justify-content:center; }
+  .thanks h3{ color:var(--navy); font-size:19px; margin-bottom:8px; }
+  .thanks p{ font-size:14px; }
+  .thanks .tel{ display:inline-block; margin-top:14px; background:var(--navy); color:#fff; text-decoration:none; font-weight:800; padding:11px 24px; border-radius:999px; font-size:15px; }
+  .notready{ text-align:center; padding:40px 16px; color:var(--navy); font-weight:700; display:none; }
+</style>
+</head>
+<body>
+<div class="wrap" id="shWrap">
+  <div class="head">
+    <span class="badge">診断無料・相談無料</span>
+    <h1 id="shTitle">診断フォーム</h1>
+    <p id="shLead"></p>
+  </div>
+
+  <div class="notready" id="shNotReady">この診断は準備中です。<br>お急ぎの方は 0120-100-299（IBSグループ）までお気軽にご相談ください。</div>
+
+  <form id="shForm" novalidate>
+    <div class="sec-t">■ 貴社について</div>
+    <div class="qbox" id="shAttr"></div>
+    <div class="sec-t">■ あてはまる方を選んでください</div>
+    <div class="qbox" id="shYn"></div>
+
+    <div class="sec-t">■ 診断結果のお届け先</div>
+    <div class="qbox" style="padding:4px 12px 14px">
+      <div class="field">
+        <label class="fl" for="sh-company">会社名<span class="req">（必須・個人事業主の方は屋号）</span></label>
+        <input type="text" id="sh-company" autocomplete="organization" placeholder="例）株式会社◯◯">
+        <p class="err" id="err-company">会社名（または屋号）をご入力ください。</p>
+      </div>
+      <div class="field">
+        <label class="fl" for="sh-name">ご担当者名<span class="opt">（任意）</span></label>
+        <input type="text" id="sh-name" autocomplete="name" placeholder="例）足利 太郎">
+      </div>
+      <div class="field">
+        <label class="fl" for="sh-tel">お電話番号<span class="req">（必須）</span></label>
+        <input type="tel" id="sh-tel" autocomplete="tel" placeholder="例）0284-00-0000">
+        <p class="err" id="err-tel">お電話番号をご入力ください。</p>
+      </div>
+      <div class="field">
+        <label class="fl" for="sh-mail">メールアドレス<span class="req">（必須・診断結果の送付先）</span></label>
+        <input type="email" id="sh-mail" autocomplete="email" placeholder="例）info@example.co.jp">
+        <p class="err" id="err-mail">正しいメールアドレスをご入力ください。</p>
+      </div>
+      <div class="hp" aria-hidden="true"><label>この欄は空のままにしてください<input type="text" name="company_url" tabindex="-1" autocomplete="off"></label></div>
+      <label class="consent">
+        <input type="checkbox" id="sh-agree">
+        <span><a href="https://ibsconsulting.jp/401k/privacy-policy/" target="_blank" rel="noopener">プライバシーポリシー</a>に同意し、診断結果レポートの送付および<span id="shNoun">本診断</span>に関するご案内メールの受け取りに同意します。<b style="color:var(--err)">（必須）</b></span>
+      </label>
+      <p class="err" id="err-agree">ご同意のうえチェックを入れてください。</p>
+      <p class="err" id="err-yn">未回答の設問があります。すべての設問にお答えください。</p>
+      <div class="top-err" id="shTopErr"></div>
+      <button type="submit" class="submit" id="shSubmit">診断を申し込む（無料）<small>＼ 3営業日以内に診断結果レポートをお送りします ／</small></button>
+      <p class="priv">ご入力情報は診断結果の送付・ご連絡、及び関連するご案内のみに利用し、第三者へ提供しません。配信は各メール内のリンク等でいつでも停止できます。</p>
+    </div>
+  </form>
+
+  <div class="thanks" id="shThanks" role="status" aria-live="polite">
+    <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5 11-11"/></svg></div>
+    <h3>お申し込みありがとうございます</h3>
+    <p>ご回答を受け付けました。<span class="mail" id="shThMail" style="font-weight:800"></span> 宛に受付メールをお送りしています。</p>
+    <p>担当者がご回答を拝見し、<b>3営業日以内に診断結果レポート</b>をお送りいたします。</p>
+    <p style="font-size:12px;color:#5f7186;margin-top:10px">※ 届かない場合は迷惑メール／プロモーションフォルダをご確認ください。</p>
+    <a class="tel" href="tel:0120100299">お急ぎの方は 0120-100-299</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbziZQDyG7CUrOwx-YKEdNj63-uuGMlfNvtYpMrtRBYyanQ3u5sFJrV9vXwvITB4s2apAw/exec'; // S4捕捉フォームGASと同一デプロイ
+  var CONSENT_VER = 'shindan-2026-07-05';
+
+  // ---- 磁石別の設問セット（識別子はGAS側 MAGNET_LABEL / DIAG_MAGNETS と一致させる）----
+  var CFG = {
+    'kyuyo-rakuraku': {
+      title:'らくらく給与・ひとり総務診断', noun:'給与・総務の体制づくり',
+      lead:'貴社の給与計算・総務業務の現在の状況についてお答えください。「止まるリスク」と改善の伸びしろを診断し、レポートをお返しします（回答約5分）。',
+      attr:[
+        {q:'貴社の業種は何ですか', type:'text'},
+        {q:'従業員は何人ですか', opts:['0人','1〜9人','10〜50人','51〜100人','101人〜']},
+        {q:'給与計算は誰が行っていますか', opts:['社長・ご家族','担当者1名','担当者2名以上','外部委託']},
+        {q:'勤怠（タイムカード）の集計方法は', opts:['紙・手集計','Excel','クラウド勤怠','その他']},
+        {q:'給与計算の方法は', opts:['手計算・Excel','給与ソフト','クラウド給与','外部委託']}
+      ],
+      yn:[
+        '給与計算のやり方が、担当者の頭の中でなく手順書・マニュアルになっていますか',
+        '給与担当者が急に1か月休んでも、給与を予定日どおり支払える体制がありますか',
+        '計算結果を担当者以外の誰かがチェックしていますか（ダブルチェック）',
+        '担当者の退職・産休・介護休業が決まったときの引き継ぎ先が決まっていますか',
+        'タイムカードの集計は自動化されていますか（クラウド勤怠等）',
+        '残業代の単価・端数処理を、法改正に合わせて見直したことがありますか',
+        '社会保険料率・雇用保険料率・税率の変更を毎年反映する仕組みがありますか',
+        '従業員の有給休暇の残日数を、聞かれてすぐ答えられますか',
+        '入社・退職のたびの社会保険・雇用保険の手続きは、期限内に回っていますか',
+        '「なぜ付いているのか分からない手当」がなく、賃金規程と実際の支給が一致していますか',
+        '社長・ご家族は、給与計算や事務作業から解放されていますか',
+        '給与データの保管にセキュリティ対策がありますか（アクセス制限・施錠等）',
+        '事務担当を1人雇う場合の年間コスト（給与＋社会保険＋採用・教育）を把握していますか',
+        '給与・労務について気軽に相談できる専門家がいますか',
+        '体制づくりに使える可能性のある助成金を確認したことがありますか'
+      ]
+    },
+    'joseikin-rakuraku': {
+      title:'らくらく助成金診断', noun:'助成金の活用',
+      lead:'貴社の現在の状況あるいは今後の予定についてお答えください。活用できる可能性のある助成金を診断し、レポートをお返しします（回答約5分）。',
+      attr:[
+        {q:'貴社の業種は何ですか', type:'text'},
+        {q:'社会保険の加入状況はいかがですか', opts:['加入済み','一部加入','未加入']},
+        {q:'従業員（雇用保険被保険者）は何人ですか', opts:['0人','1〜9人','10〜50人','51〜100人','101人〜']},
+        {q:'パート・アルバイト・契約社員等は何人ですか', opts:['0人','1〜9人','10〜50人','51〜100人','101人〜']},
+        {q:'60歳以上の従業員は何人ですか', opts:['0人','1〜9人','10〜50人','51〜100人','101人〜']}
+      ],
+      yn:[
+        '就業規則を労働基準監督署に届け出ていますか',
+        '65歳以上の定年か継続雇用制度を定めていますか',
+        'パート・アルバイト・契約社員等の待遇を改善する予定はありますか',
+        '中高年齢者を従業員として雇い入れる予定がありますか',
+        '新たな従業員の雇い入れ、または出向者の受け入れの予定がありますか',
+        '障害者を雇い入れる予定がありますか',
+        '女性従業員の管理職登用や育成の予定がありますか',
+        '従業員の能力開発のために、教育訓練の実施あるいは支援をする予定がありますか',
+        '従業員の育児・介護のための支援をする予定がありますか',
+        '介護関連事業に携わっている、または予定がありますか',
+        '従業員のために雇用管理を充実させる予定がありますか',
+        '障害者のために職場環境を充実させる予定がありますか',
+        '事業の縮小または従業員のリストラ、休業、出向、配置転換の予定がありますか',
+        '再就職のための支援の予定がありますか',
+        '顧問契約をしている社会保険労務士がいますか'
+      ]
+    },
+    'keiei-kenshin': {
+      title:'経営サポート健康診断', noun:'経営サポート体制づくり',
+      lead:'貴社がいま受けられている経営サポートの状況についてお答えください。「本来受けられる支援の全体像」と照らし合わせた診断レポートをお返しします（回答約5分）。',
+      attr:[
+        {q:'貴社の業種は何ですか', type:'text'},
+        {q:'従業員は何人ですか', opts:['0人','1〜9人','10〜50人','51〜100人','101人〜']},
+        {q:'外部の専門家に依頼していることは（複数可）', opts:['税務','労務手続き','給与計算','保険','特にない'], multi:true},
+        {q:'経営を「定期的に」相談する機会は', opts:['毎月','年数回','特にない']},
+        {q:'いま一番気になっている分野は', opts:['人手・採用','給与・労務事務','資金繰り','制度改正','定着','その他']}
+      ],
+      yn:[
+        '労務・人事について、手続きのとき以外にも相談できる相手がいますか',
+        '困りごとの質問に、おおむね2営業日以内に答えが返ってくる環境がありますか',
+        'チャット等で、電話のかけ直しを待たずに気軽に質問できる窓口がありますか',
+        '労働法・社会保険の法改正情報が「自社に関係する形」で届いていますか',
+        '使える可能性のある助成金・補助金の情報が定期的に届いていますか',
+        '就業規則は、直近の法改正に合わせて見直しができていますか',
+        '給与計算・勤怠の仕組みについて、改善の提案を受ける機会がありますか',
+        '採用（求人票・応募対応・定着）について相談できる相手がいますか',
+        '賃金の決め方・評価制度について相談できる相手がいますか',
+        '資金繰り・融資・事業計画など「お金」の相談ができる相手がいますか',
+        '経営者自身の退職金・年金づくり（企業型DC等）の相談ができていますか',
+        '問題が起きる前に「先回りの提案」を受ける機会がありますか',
+        '外部に支払っている費用で「何をどこまで頼めるか」が明確になっていますか',
+        '相談や面談の内容が記録に残り、あとから見返せる形になっていますか',
+        '経営のサポート体制を、年に一度でも棚卸し・見直ししていますか'
+      ]
+    }
+  };
+
+  function qp(name){ try{ return new URLSearchParams(location.search).get(name)||''; }catch(e){ return ''; } }
+  var MAGNET = qp('m');
+  var cfg = CFG[MAGNET];
+
+  var form = document.getElementById('shForm');
+  if(!cfg){ // 未定義 or 封印中（saiyo-rakuraku等）
+    document.getElementById('shTitle').textContent = '診断のご案内';
+    document.getElementById('shNotReady').style.display = 'block';
+    form.style.display = 'none';
+    postH(); return;
+  }
+  document.title = cfg.title + '｜IBSグループ';
+  document.getElementById('shTitle').textContent = cfg.title;
+  document.getElementById('shLead').textContent = cfg.lead;
+  document.getElementById('shNoun').textContent = cfg.noun;
+
+  // ---- 設問の描画 ----
+  var attrBox = document.getElementById('shAttr'), ynBox = document.getElementById('shYn');
+  cfg.attr.forEach(function(a, i){
+    var n = i + 1;
+    var div = document.createElement('div'); div.className = 'q';
+    var html = '<div class="qt"><span class="no">' + n + '</span>' + esc(a.q) + '</div>';
+    if(a.type === 'text'){
+      html += '<input type="text" data-q="q' + n + '" placeholder="例）製造業">';
+    } else {
+      html += '<div class="opts">' + a.opts.map(function(o){
+        var t = a.multi ? 'checkbox' : 'radio';
+        return '<label><input type="' + t + '" name="q' + n + '" value="' + esc(o) + '">' + esc(o) + '</label>';
+      }).join('') + '</div>';
+    }
+    div.innerHTML = html; attrBox.appendChild(div);
+  });
+  cfg.yn.forEach(function(q, i){
+    var n = i + 6;
+    var div = document.createElement('div'); div.className = 'q yn';
+    div.innerHTML = '<div class="qt"><span class="no">' + n + '</span>' + esc(q) + '</div>'
+      + '<div class="opts"><label><input type="radio" name="q' + n + '" value="YES">YES</label>'
+      + '<label><input type="radio" name="q' + n + '" value="NO">NO</label></div>';
+    ynBox.appendChild(div);
+  });
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+  // ---- 回答の収集 ----
+  function collect(){
+    var a = {};
+    var t = attrBox.querySelector('input[data-q]');
+    if(t && t.value.trim()) a[t.getAttribute('data-q')] = t.value.trim();
+    for(var n = 2; n <= 20; n++){
+      var els = form.querySelectorAll('input[name=q' + n + ']:checked');
+      if(els.length){ a['q' + n] = Array.prototype.map.call(els, function(e){ return e.value; }).join('・'); }
+    }
+    return a;
+  }
+  function ynComplete(a){ for(var n = 6; n <= 20; n++){ if(!a['q' + n]) return false; } return true; }
+
+  // ---- 計測用（S13-CAPI重複排除と同型）----
+  function uuid(){ try{ return crypto.randomUUID(); }catch(e){ return 'sh-' + Date.now() + '-' + Math.random().toString(16).slice(2); } }
+  function cookie(name){ var m = document.cookie.match('(^|;)\\s*' + name + '=([^;]+)'); return m ? decodeURIComponent(m[2]) : ''; }
+
+  var btn = document.getElementById('shSubmit'), topErr = document.getElementById('shTopErr'), sent = false;
+  function showTop(msg){ topErr.textContent = msg; topErr.style.display = 'block'; postH(); }
+  function reset(msg){ sent = false; btn.disabled = false; btn.textContent = '再送信する'; showTop(msg); }
+  function success(mail, eid){
+    try{ if(typeof gtag === 'function'){ gtag('event','generate_lead',{ lead_magnet:MAGNET, method:'shindan_form', value:1 }); }
+         else { (window.dataLayer = window.dataLayer || []).push({ event:'generate_lead', lead_magnet:MAGNET, method:'shindan_form' }); } }catch(e){}
+    try{ if(typeof fbq === 'function'){ fbq('track','Lead',{ content_name:MAGNET }, { eventID: eid }); } }catch(e){}
+    document.getElementById('shThMail').textContent = mail;
+    document.getElementById('shWrap').classList.add('done');
+    try{ document.getElementById('shWrap').scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){}
+    postH();
+  }
+
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    if(sent) return;
+    topErr.style.display = 'none';
+
+    var mail = document.getElementById('sh-mail').value.trim();
+    var tel = document.getElementById('sh-tel').value.trim();
+    var company = document.getElementById('sh-company').value.trim();
+    var agree = document.getElementById('sh-agree').checked;
+    var hp = form.querySelector('input[name=company_url]').value;
+    var answers = collect();
+
+    var ok = true;
+    function flag(id, bad){ document.getElementById(id).style.display = bad ? 'block' : 'none'; if(bad) ok = false; }
+    flag('err-company', !company);
+    flag('err-tel', !/^[0-9()+\-\s]{10,}$/.test(tel));
+    flag('err-mail', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail));
+    flag('err-agree', !agree);
+    flag('err-yn', !ynComplete(answers));
+    if(!ok){ postH(); return; }
+    if(hp){ return; }
+
+    var eid = uuid();
+    var payload = {
+      magnet: MAGNET, mail: mail, name: document.getElementById('sh-name').value.trim(),
+      company: company, tel: tel, answers: answers,
+      agree: true, consentVer: CONSENT_VER,
+      consentText: 'プライバシーポリシーに同意し、診断結果レポート送付＋' + cfg.noun + '案内メール受信に同意',
+      pageUrl: location.href, referrer: document.referrer || '', ua: navigator.userAgent || '',
+      utm_source: qp('utm_source'), utm_medium: qp('utm_medium'), utm_campaign: qp('utm_campaign'),
+      ts_client: new Date().toISOString(),
+      event_id: eid, fbp: cookie('_fbp'), fbc: cookie('_fbc')
+    };
+
+    sent = true; btn.disabled = true; btn.textContent = '送信中…';
+    var settled = false;
+    function finish(ok2, msg){ if(settled) return; settled = true; if(ok2){ success(mail, eid); } else { reset(msg); } }
+    fetch(ENDPOINT, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload)})
+      .then(function(){ finish(true); })
+      .catch(function(){ finish(false, '送信できませんでした。時間をおいて再度お試しください（お急ぎは 0120-100-299）。'); });
+    setTimeout(function(){ finish(true); }, 2000);
+  });
+
+  // ---- iframe自動リサイズ（見積ナビと同型）----
+  function postH(){ try{ parent.postMessage({ ibsShindanHeight: document.body.scrollHeight }, '*'); }catch(e){} }
+  window.addEventListener('load', postH);
+  window.addEventListener('resize', postH);
+  setTimeout(postH, 300); setTimeout(postH, 1200);
+})();
+</script>
+</body>
+</html>
