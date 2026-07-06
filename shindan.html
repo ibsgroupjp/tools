@@ -6,8 +6,8 @@
 <title>IBS 診断フォーム</title>
 <!--
   IBS 診断フォーム（診断返し型磁石 共通・S4-K2）
-  ・URLパラメータ ?m= で磁石を切替: kyuyo-rakuraku / joseikin-rakuraku / keiei-kenshin
-    （saiyo-rakuraku はGAS受け口のみ実装済み・本フォームでは「準備中」表示＝第4弾判定まで封印）
+  ・URLパラメータ ?m= で磁石を切替: kyuyo-rakuraku / joseikin-rakuraku / keiei-kenshin / saiyo-rakuraku
+    （saiyoは2026-07-06司令室裁定で第4弾GO＝封印解除・PPC非依存でMeta/税理士紹介面の磁石）
   ・送信先=S4捕捉フォームGAS（同一デプロイ）。answers{q1..q20}＋TEL付きでPOST。
   ・TEL・会社名（屋号可）=必須＝高関与B2Bの本気度フィルタ。
   ・event_id/fbp/fbc同梱=S13-CAPI重複排除と同型（iframe設置時はfbp/fbcが取れないことがあるが、
@@ -211,6 +211,34 @@
         '相談や面談の内容が記録に残り、あとから見返せる形になっていますか',
         '経営のサポート体制を、年に一度でも棚卸し・見直ししていますか'
       ]
+    },
+    'saiyo-rakuraku': {
+      title:'らくらく採用診断', noun:'採用活動の改善',
+      lead:'貴社の採用活動の現在の状況についてお答えください。「詰まりどころ」（母集団づくり・求人票・応募対応・面談・定着）を診断し、レポートをお返しします（回答約5分）。',
+      attr:[
+        {q:'貴社の業種は何ですか', type:'text'},
+        {q:'従業員は何人ですか', opts:['0人','1〜9人','10〜50人','51〜100人','101〜300人','301人以上']},
+        {q:'この1年で採用したい人数は何人ですか', opts:['0人','1〜2人','3〜5人','6〜10人','11人以上']},
+        {q:'いま募集している（したい）職種は何ですか', type:'text', ph:'例）製造スタッフ、営業'},
+        {q:'現在の採用手段はどれですか（複数可）', opts:['ハローワーク','Indeed等の求人サイト','紹介','自社HP','SNS','その他'], multi:true}
+      ],
+      yn:[
+        '採用したい人物像を文字にしたことがありますか（ペルソナ）',
+        '求人票に仕事内容・給与・働き方を具体的な数字で書いていますか',
+        '自社ならではの魅力を求人票で言葉にできていますか',
+        'ハローワーク以外の媒体も併用していますか',
+        '応募から24時間以内に返信できる体制がありますか',
+        '応募者に選考の進み具合を途中連絡していますか',
+        '面談は質問項目を事前に決めて臨んでいますか',
+        '面談で自社に合う人かを見極める質問を用意していますか',
+        '内定から入社日までの間、定期的に連絡を取っていますか',
+        '入社後3か月のフォロー（面談・教育係）を決めていますか',
+        '応募数・面談率・辞退率などの数字を記録していますか',
+        '自社HPに採用ページ（写真・社員の声）がありますか',
+        '採用にかけた費用と成果を年単位で振り返っていますか',
+        '採用・育成で使える助成金を確認したことがありますか',
+        '採用について相談できる専門家（顧問社労士等）がいますか'
+      ]
     }
   };
 
@@ -237,7 +265,7 @@
     var div = document.createElement('div'); div.className = 'q';
     var html = '<div class="qt"><span class="no">' + n + '</span>' + esc(a.q) + '</div>';
     if(a.type === 'text'){
-      html += '<input type="text" data-q="q' + n + '" placeholder="例）製造業">';
+      html += '<input type="text" data-q="q' + n + '" placeholder="' + esc(a.ph || '例）製造業') + '">';
     } else {
       html += '<div class="opts">' + a.opts.map(function(o){
         var t = a.multi ? 'checkbox' : 'radio';
@@ -259,8 +287,9 @@
   // ---- 回答の収集 ----
   function collect(){
     var a = {};
-    var t = attrBox.querySelector('input[data-q]');
-    if(t && t.value.trim()) a[t.getAttribute('data-q')] = t.value.trim();
+    attrBox.querySelectorAll('input[data-q]').forEach(function(t){
+      if(t.value.trim()) a[t.getAttribute('data-q')] = t.value.trim();
+    });
     for(var n = 2; n <= 20; n++){
       var els = form.querySelectorAll('input[name=q' + n + ']:checked');
       if(els.length){ a['q' + n] = Array.prototype.map.call(els, function(e){ return e.value; }).join('・'); }
