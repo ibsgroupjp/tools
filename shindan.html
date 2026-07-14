@@ -64,6 +64,10 @@
   .thanks h3{ color:var(--navy); font-size:19px; margin-bottom:8px; }
   .thanks p{ font-size:14px; }
   .thanks .tel{ display:inline-block; margin-top:14px; background:var(--navy); color:#fff; text-decoration:none; font-weight:800; padding:11px 24px; border-radius:999px; font-size:15px; }
+  .thanks .sla-note{ font-size:12.5px; color:#5f7186; margin-top:8px; line-height:1.7; text-align:left; max-width:460px; margin-left:auto; margin-right:auto; }
+  .thanks .signup-note{ background:var(--pale); border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin:16px auto 0; max-width:460px; text-align:left; }
+  .thanks .signup-note .snt{ display:block; font-weight:800; color:var(--navy); font-size:14px; margin-bottom:3px; }
+  .thanks .signup-note .snb{ display:block; font-size:13px; color:var(--ink); }
   .notready{ text-align:center; padding:40px 16px; color:var(--navy); font-weight:700; display:none; }
 </style>
 </head>
@@ -107,13 +111,13 @@
       <div class="hp" aria-hidden="true"><label>この欄は空のままにしてください<input type="text" name="company_url" tabindex="-1" autocomplete="off"></label></div>
       <label class="consent">
         <input type="checkbox" id="sh-agree">
-        <span><a href="https://ibsconsulting.jp/401k/privacy-policy/" target="_blank" rel="noopener">プライバシーポリシー</a>に同意し、診断結果レポートの送付および<span id="shNoun">本診断</span>に関するご案内メールの受け取りに同意します。<b style="color:var(--err)">（必須）</b></span>
+        <span><a href="https://ibsconsulting.jp/401k/privacy-policy/" target="_blank" rel="noopener">プライバシーポリシー</a>に同意し、診断結果レポートの送付、およびIBSグループからのお役立ち情報（法改正・労務等）の配信に同意します。<b style="color:var(--err)">（必須）</b></span>
       </label>
       <p class="err" id="err-agree">ご同意のうえチェックを入れてください。</p>
       <p class="err" id="err-yn">未回答の設問があります。すべての設問にお答えください。</p>
       <div class="top-err" id="shTopErr"></div>
-      <button type="submit" class="submit" id="shSubmit">診断を申し込む（無料）<small>＼ 3営業日以内に診断結果レポートをお送りします ／</small></button>
-      <p class="priv">ご入力情報は診断結果の送付・ご連絡、及び関連するご案内のみに利用し、第三者へ提供しません。配信は各メール内のリンク等でいつでも停止できます。</p>
+      <button type="submit" class="submit" id="shSubmit">診断を申し込む（無料）<small>＼ 3営業日以内（目安）に診断結果レポートをお送りします ／</small></button>
+      <p class="priv">ご入力情報は診断結果の送付・ご連絡、及びお役立ち情報の配信に利用し、第三者へ提供しません。配信は各メール内のリンク等でいつでも停止できます。</p>
     </div>
   </form>
 
@@ -121,7 +125,12 @@
     <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5 11-11"/></svg></div>
     <h3>お申し込みありがとうございます</h3>
     <p>ご回答を受け付けました。<span class="mail" id="shThMail" style="font-weight:800"></span> 宛に受付メールをお送りしています。</p>
-    <p>担当者がご回答を拝見し、<b>3営業日以内に診断結果レポート</b>をお送りいたします。</p>
+    <p>担当者がご回答を拝見し、<b>3営業日以内（目安）に診断結果レポート</b>をお送りします。</p>
+    <p class="sla-note">※ ていねいな診断のため、レポートの作成は月20件までとさせていただいており、お申し込みが集中した月は翌月のご案内となることがあります（その際はご連絡します）。</p>
+    <div class="signup-note">
+      <span class="snt">お役立ち情報の配信に登録しました</span>
+      <span class="snb">法改正・労務などの実務に役立つ情報を、IBSグループよりお届けします。配信の停止は、いつでも各メール内のリンクから行えます。</span>
+    </div>
     <p style="font-size:12px;color:#5f7186;margin-top:10px">※ 届かない場合は迷惑メール／プロモーションフォルダをご確認ください。</p>
     <a class="tel" href="tel:0120100299">お急ぎの方は 0120-100-299</a>
   </div>
@@ -130,7 +139,7 @@
 <script>
 (function(){
   var ENDPOINT = 'https://script.google.com/macros/s/AKfycbziZQDyG7CUrOwx-YKEdNj63-uuGMlfNvtYpMrtRBYyanQ3u5sFJrV9vXwvITB4s2apAw/exec'; // S4捕捉フォームGASと同一デプロイ
-  var CONSENT_VER = 'shindan-2026-07-05';
+  var CONSENT_VER = 'shindan-2026-07-14';  // 同意スコープ拡大（診断固有→IBSグループのお役立ち情報配信）に伴い改版
 
   // ---- 磁石別の設問セット（識別子はGAS側 MAGNET_LABEL / DIAG_MAGNETS と一致させる）----
   var CFG = {
@@ -264,7 +273,7 @@
   document.title = cfg.title + '｜IBSグループ';
   document.getElementById('shTitle').textContent = cfg.title;
   document.getElementById('shLead').textContent = cfg.lead;
-  document.getElementById('shNoun').textContent = cfg.noun;
+  // 同意文言は磁石固有nounから「IBSグループのお役立ち情報配信」へ拡大（2026-07-14）＝shNounは廃止
 
   // ---- 設問の描画 ----
   var attrBox = document.getElementById('shAttr'), ynBox = document.getElementById('shYn');
@@ -370,7 +379,7 @@
       magnet: MAGNET, mail: mail, name: document.getElementById('sh-name').value.trim(),
       company: company, tel: tel, answers: answers,
       agree: true, consentVer: CONSENT_VER,
-      consentText: 'プライバシーポリシーに同意し、診断結果レポート送付＋' + cfg.noun + '案内メール受信に同意',
+      consentText: 'プライバシーポリシーに同意し、診断結果レポート送付＋IBSグループからのお役立ち情報（法改正・労務等）の配信に同意',
       pageUrl: location.href, referrer: document.referrer || '', ua: navigator.userAgent || '',
       utm_source: qp('utm_source'), utm_medium: qp('utm_medium'), utm_campaign: qp('utm_campaign'),
       ts_client: new Date().toISOString(),
@@ -396,3 +405,5 @@
 </body>
 </html>
 <!-- build 20260713 磁石①入口改修（joseikin-rakuraku ヒーロー: リード改+チップ+開始ボタン） -->
+<!-- build 20260714 サンクス次の一段: 配信登録通知+月20件SLA逃げ / 同意スコープ拡大(お役立ち情報配信)+CONSENT_VER改版 / SLA目安化(3営業日以内→目安) -->
+<!--   ※桶接続の本体はGAS側(IBS_捕捉フォーム_GAS.gs writeRow_)＝診断型は送信時に初回DL日時をセットしてシングルオプトイン化。要・新バージョン再デプロイ（正田ゲート）。 -->
