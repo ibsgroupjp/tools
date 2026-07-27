@@ -16,6 +16,16 @@
     <iframe id="ibs-shindan" src="【本ファイルの公開URL】?m=kyuyo-rakuraku" style="width:100%;border:none" scrolling="no"></iframe>
     <script>window.addEventListener('message',function(e){ if(e.data&&e.data.ibsShindanHeight){ document.getElementById('ibs-shindan').style.height=(e.data.ibsShindanHeight+20)+'px'; } });</script>
 -->
+<!-- GA4基礎タグ（母艦ibssr.jpと同一プロパティ・測定IDはリテラル記述必須=GSC所有権の静的スキャン対応）
+     iframe二重計上回避: Jimdo母艦のiframe内では send_page_view:false（page_viewは親ページ側が送る）、
+     広告直着地（スタンドアロン）時のみ page_view 送信。gtag自体は両文脈で定義される＝generate_leadは常に発火。 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-77H76CX7YF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-77H76CX7YF', { send_page_view: window.self === window.top });
+</script>
 <style>
   :root{ --navy:#002060; --cyan:#0098E0; --gold:#FFC000; --ink:#333333; --pale:#EAF6FD; --line:#C9DCE8; --err:#c0392b; }
   *{ margin:0; padding:0; box-sizing:border-box; }
@@ -407,3 +417,4 @@
 <!-- build 20260713 磁石①入口改修（joseikin-rakuraku ヒーロー: リード改+チップ+開始ボタン） -->
 <!-- build 20260714 サンクス次の一段: 配信登録通知+月20件SLA逃げ / 同意スコープ拡大(お役立ち情報配信)+CONSENT_VER改版 / SLA目安化(3営業日以内→目安) -->
 <!--   ※桶接続の本体はGAS側(IBS_捕捉フォーム_GAS.gs writeRow_)＝診断型は送信時に初回DL日時をセットしてシングルオプトイン化。要・新バージョン再デプロイ（正田ゲート）。 -->
+<!-- build 20260727 GA4計測修理: gtag.jsローダ＋config G-77H76CX7YF（リテラル）を<head>に追加。iframe二重計上回避=window.self===window.topでsend_page_view分岐。既存のgenerate_lead/fbq/フォーム/同意/ENDPOINTは不変。 -->
