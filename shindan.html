@@ -33,6 +33,7 @@
   .wrap{ max-width:720px; margin:0 auto; padding:8px 14px 28px; }
   .head{ background:var(--navy); color:#fff; border-radius:10px; padding:18px 20px; margin-bottom:14px; }
   .head .badge{ display:inline-block; background:var(--gold); color:var(--navy); font-weight:800; font-size:12px; padding:2px 12px; border-radius:3px; margin-bottom:6px; }
+  .head .eyebrow{ display:block; font-size:12.5px; font-weight:700; color:#CFE6F7; margin-bottom:4px; }
   .head h1{ font-size:22px; line-height:1.4; }
   .head p{ font-size:13px; color:#CFE6F7; margin-top:4px; }
   .head .chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
@@ -85,6 +86,7 @@
 <div class="wrap" id="shWrap">
   <div class="head">
     <span class="badge">診断無料・相談無料</span>
+    <span class="eyebrow" id="shEyebrow" style="display:none"></span>
     <h1 id="shTitle">診断フォーム</h1>
     <p id="shLead"></p>
   </div>
@@ -183,11 +185,13 @@
     },
     'joseikin-rakuraku': {
       title:'らくらく助成金診断', noun:'助成金の活用',
-      lead:'20問のかんたんなチェックで、貴社が活用できる可能性のある助成金を無料で診断。結果はレポートでお返しします。',
+      eyebrow:'らくらく助成金診断｜中小企業の経営者の方へ',
+      h1:'その残業対策・賃上げ・人材育成、雇用関係の助成金の対象かもしれません。',
+      lead:'「うちも対象？」には、20問・約5分の無料チェックでお答えします。取りこぼしがないか診断し、結果は社労士がレポートでお返しします。',
       chips:['回答は約5分','20問チェック式','診断結果レポート無料'],
       startBtn:'診断をはじめる（無料）',
       attr:[
-        {q:'貴社の業種は何ですか', type:'text'},
+        {q:'貴社の業種は何ですか', opts:['建設業','製造業','運輸・物流','卸売・小売','飲食・宿泊','医療・介護・福祉','サービス業','その他']},
         {q:'社会保険の加入状況はいかがですか', opts:['加入済み','一部加入','未加入']},
         {q:'従業員（雇用保険被保険者）は何人ですか', opts:['0人','1〜9人','10〜50人','51〜100人','101人〜']},
         {q:'パート・アルバイト・契約社員等は何人ですか', opts:['0人','1〜9人','10〜50人','51〜100人','101人〜']},
@@ -281,8 +285,10 @@
     postH(); return;
   }
   document.title = cfg.title + '｜IBSグループ';
-  document.getElementById('shTitle').textContent = cfg.title;
+  document.getElementById('shTitle').textContent = cfg.h1 || cfg.title;
   document.getElementById('shLead').textContent = cfg.lead;
+  // 小書き（eyebrow）＝設定した磁石のみ表示・他磁石は不変（2026-07-28 第2弾メッセージマッチ）
+  if(cfg.eyebrow){ var eb = document.getElementById('shEyebrow'); eb.textContent = cfg.eyebrow; eb.style.display = 'block'; }
   // 同意文言は磁石固有nounから「IBSグループのお役立ち情報配信」へ拡大（2026-07-14）＝shNounは廃止
 
   // ---- 設問の描画 ----
@@ -337,7 +343,7 @@
     attrBox.querySelectorAll('input[data-q]').forEach(function(t){
       if(t.value.trim()) a[t.getAttribute('data-q')] = t.value.trim();
     });
-    for(var n = 2; n <= 20; n++){
+    for(var n = 1; n <= 20; n++){ // n=1から＝Q1が選択式の磁石でも回答を拾う（テキスト型磁石は上のdata-q収集で拾うため無害）
       var els = form.querySelectorAll('input[name=q' + n + ']:checked');
       if(els.length){ a['q' + n] = Array.prototype.map.call(els, function(e){ return e.value; }).join('・'); }
     }
@@ -415,6 +421,7 @@
 </body>
 </html>
 <!-- build 20260713 磁石①入口改修（joseikin-rakuraku ヒーロー: リード改+チップ+開始ボタン） -->
+<!-- build 20260728 診断LP第2弾＝メッセージマッチ（joseikin-rakurakuのみ: eyebrow/h1/lead を広告文言と一致・Q1業種を8択タップ化。collect()のループ始点を1へ＝選択式Q1の取りこぼし防止・他3診断は不変） -->
 <!-- build 20260714 サンクス次の一段: 配信登録通知+月20件SLA逃げ / 同意スコープ拡大(お役立ち情報配信)+CONSENT_VER改版 / SLA目安化(3営業日以内→目安) -->
 <!--   ※桶接続の本体はGAS側(IBS_捕捉フォーム_GAS.gs writeRow_)＝診断型は送信時に初回DL日時をセットしてシングルオプトイン化。要・新バージョン再デプロイ（正田ゲート）。 -->
 <!-- build 20260727 GA4計測修理: gtag.jsローダ＋config G-77H76CX7YF（リテラル）を<head>に追加。iframe二重計上回避=window.self===window.topでsend_page_view分岐。既存のgenerate_lead/fbq/フォーム/同意/ENDPOINTは不変。 -->
