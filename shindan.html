@@ -26,6 +26,22 @@
   gtag('js', new Date());
   gtag('config', 'G-77H76CX7YF', { send_page_view: window.self === window.top });
 </script>
+<!-- Meta Pixel基礎タグ（広告アカウント IBS-Meta-Main / Pixel 27630244613253987＝母艦ibssr.jpと同一Pixel）
+     iframe二重計上回避: Jimdo母艦の親ページ（/price/らくらく助成金診断/ 他4枚）にも同一Pixelのベースコード＋
+     fbq('track','PageView') が入っていることを2026-07-28に実測。よってiframe内ではPageViewを撃たず、
+     広告直着地（スタンドアロン）時のみ送信＝GA4のsend_page_view分岐と同型。
+     fbq自体は両文脈で定義される＝送信成功時の fbq('track','Lead',…,{eventID}) は常に発火
+     （S13-CAPI重複排除の受け皿。eventIDはGASへ送るevent_idと同一値）。
+     noscript版の1px imgは非搭載＝iframe埋め込み時にbody.scrollHeightへ混じり自動リサイズを狂わせるため。 -->
+<script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '27630244613253987');
+  if(window.self === window.top){ fbq('track', 'PageView'); }
+</script>
 <style>
   :root{ --navy:#002060; --cyan:#0098E0; --gold:#FFC000; --ink:#333333; --pale:#EAF6FD; --line:#C9DCE8; --err:#c0392b; }
   *{ margin:0; padding:0; box-sizing:border-box; }
@@ -425,3 +441,4 @@
 <!-- build 20260714 サンクス次の一段: 配信登録通知+月20件SLA逃げ / 同意スコープ拡大(お役立ち情報配信)+CONSENT_VER改版 / SLA目安化(3営業日以内→目安) -->
 <!--   ※桶接続の本体はGAS側(IBS_捕捉フォーム_GAS.gs writeRow_)＝診断型は送信時に初回DL日時をセットしてシングルオプトイン化。要・新バージョン再デプロイ（正田ゲート）。 -->
 <!-- build 20260727 GA4計測修理: gtag.jsローダ＋config G-77H76CX7YF（リテラル）を<head>に追加。iframe二重計上回避=window.self===window.topでsend_page_view分岐。既存のgenerate_lead/fbq/フォーム/同意/ENDPOINTは不変。 -->
+<!-- build 20260728 Meta Pixel実装: fbevents.jsローダ＋fbq('init','27630244613253987')を<head>のGA4直後に追加。PageViewはwindow.self===window.topのときのみ（母艦親ページに同一Pixelが在る＝二重計上回避・実測済）。noscript版の1px imgは非搭載（iframe自動リサイズ保護）。既存のfbq('track','Lead',…,{eventID:eid})とeid生成・GA4・フォーム機能・ENDPOINT・他3診断は不変。 -->
