@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>最低賃金の10月改定 実務セルフチェック｜IBSグループ</title>
+<!--
+  IBS 最低賃金10月改定セルフチェックLP（静的ダミー）
+  ・器=_ref_shindan_live.html（本番shindan.html の写し）に CSSパレット・タイポ・フォーム配線を準拠。
+  ・ENDPOINT はプレースホルダ（'ENDPOINT_URL_HERE'）＝送信はまだ本番に飛ばさない。
+    本番接続時はS4捕捉フォームGASのデプロイURLへ差し替え、GA4/Meta Pixel基礎タグも器と同型で追加する。
+  ・magnet='saitei-check-202610' ／ consentVer='saitei-check-2026-10' ／ answers.q1〜q7 ／ TEL・会社名・お名前・メール＝必須。
+  ・ハニーポット（name=company_url）・同意チェック必須・サンクス画面（.done切替）は器と同型。
+-->
+<style>
+  :root{ --navy:#002060; --cyan:#0098E0; --gold:#FFC000; --ink:#333333; --pale:#EAF6FD; --line:#C9DCE8; --err:#c0392b; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{ font-family:"Yu Gothic","游ゴシック",YuGothic,Meiryo,sans-serif; color:var(--ink); background:#fff; line-height:1.7; }
+  .wrap{ max-width:720px; margin:0 auto; padding:8px 16px 28px; }
+  .head{ background:var(--navy); color:#fff; border-radius:10px; padding:18px 20px; margin-bottom:14px; }
+  .head .badge{ display:inline-block; background:var(--gold); color:var(--navy); font-weight:800; font-size:12px; padding:2px 12px; border-radius:3px; margin-bottom:6px; }
+  .head h1{ font-size:22px; line-height:1.4; }
+  .head p{ font-size:13px; color:#CFE6F7; margin-top:6px; }
+  .sec-t{ background:var(--navy); color:#fff; font-weight:700; font-size:14px; padding:6px 12px; border-radius:6px 6px 0 0; margin-top:18px; }
+  .qbox{ border:1px solid var(--line); border-top:none; border-radius:0 0 6px 6px; }
+  .q{ padding:10px 12px; border-bottom:1px solid var(--line); }
+  .q:last-child{ border-bottom:none; }
+  .q .qt{ font-size:14px; font-weight:700; color:var(--navy); margin-bottom:6px; }
+  .q .qt .no{ color:var(--cyan); font-style:italic; margin-right:6px; }
+  .opts{ display:flex; flex-wrap:wrap; gap:6px; }
+  .opts label{ display:inline-flex; align-items:center; gap:4px; border:1.5px solid var(--line); border-radius:999px; padding:5px 14px; font-size:13px; cursor:pointer; user-select:none; }
+  .opts input{ accent-color:var(--cyan); }
+  .opts label:has(input:checked){ border-color:var(--cyan); background:var(--pale); font-weight:700; }
+  .yn .opts label{ min-width:84px; justify-content:center; font-weight:700; }
+  input[type=text],input[type=tel],input[type=email]{ width:100%; border:1.5px solid var(--line); border-radius:6px; padding:9px 12px; font-size:15px; font-family:inherit; }
+  input:focus{ outline:2px solid var(--cyan); border-color:var(--cyan); }
+  .field{ margin-top:12px; }
+  .field .fl{ display:block; font-size:13px; font-weight:700; color:var(--navy); margin-bottom:3px; }
+  .field .fl .req{ color:var(--err); font-size:11px; margin-left:6px; }
+  .consent{ display:flex; gap:8px; align-items:flex-start; font-size:12.5px; margin-top:14px; background:var(--pale); border-radius:6px; padding:10px 12px; }
+  .consent input{ margin-top:4px; accent-color:var(--cyan); }
+  .err{ color:var(--err); font-size:12px; display:none; margin-top:3px; }
+  .top-err{ display:none; background:#FDEDEC; color:var(--err); border:1px solid var(--err); border-radius:6px; padding:9px 12px; font-size:13px; margin-top:12px; }
+  .submit{ display:block; width:100%; margin-top:16px; background:var(--gold); color:var(--navy); border:none; border-radius:999px; font-family:inherit; font-size:17px; font-weight:800; padding:14px; cursor:pointer; }
+  .submit:disabled{ opacity:.6; cursor:default; }
+  .submit small{ display:block; font-size:11px; font-weight:700; }
+  .priv{ font-size:11px; color:#777; margin-top:10px; }
+  .hp{ position:absolute; left:-9999px; top:-9999px; height:1px; overflow:hidden; }
+  .thanks{ display:none; text-align:center; padding:36px 16px; }
+  .done .thanks{ display:block; }
+  .done form, .done .head p{ display:none; }
+  .thanks .ic{ width:52px; height:52px; border-radius:50%; background:var(--cyan); margin:0 auto 12px; display:flex; align-items:center; justify-content:center; }
+  .thanks h3{ color:var(--navy); font-size:19px; margin-bottom:8px; }
+  .thanks p{ font-size:14px; }
+  .thanks .tel{ display:inline-block; margin-top:14px; background:var(--navy); color:#fff; text-decoration:none; font-weight:800; padding:11px 24px; border-radius:999px; font-size:15px; }
+  .thanks .tel-note{ font-size:12.5px; color:#5f7186; margin-top:6px; }
+</style>
+</head>
+<body>
+<div class="wrap" id="scWrap">
+  <div class="head">
+    <span class="badge">無料・7問・約3分</span>
+    <h1>最低賃金の10月改定 実務セルフチェック</h1>
+    <p>2026年10月、最低賃金が改定されます。栃木県は1,125円（10月1日発効）、群馬県は1,120円（10月3日発効）です。<br>
+    影響は時給の方だけではありません。月給の方の「月給÷月平均所定労働時間」での換算チェック、残業代の単価、賃金規程・賃金テーブルの見直しにもつながります。<br>
+    7問のセルフチェックで、対応もれがないかをご確認ください。回答は約3分、結果は担当者がレポートにしてメールでお返しします。</p>
+  </div>
+
+  <form id="scForm" novalidate>
+    <div class="sec-t">■ 貴社について</div>
+    <div class="qbox">
+      <div class="q">
+        <div class="qt"><span class="no">1</span>従業員は何人ですか</div>
+        <div class="opts">
+          <label><input type="radio" name="q1" value="1〜9人">1〜9人</label>
+          <label><input type="radio" name="q1" value="10〜29人">10〜29人</label>
+          <label><input type="radio" name="q1" value="30〜49人">30〜49人</label>
+          <label><input type="radio" name="q1" value="50人以上">50人以上</label>
+        </div>
+      </div>
+      <div class="q">
+        <div class="qt"><span class="no">2</span>主たる事業場の都道府県はどちらですか</div>
+        <div class="opts">
+          <label><input type="radio" name="q2" value="栃木県">栃木県</label>
+          <label><input type="radio" name="q2" value="群馬県">群馬県</label>
+          <label><input type="radio" name="q2" value="その他">その他</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-t">■ 実務チェック（5問）</div>
+    <div class="qbox">
+      <div class="q">
+        <div class="qt"><span class="no">3</span>時給が一番低い方の時給はいくらですか</div>
+        <div class="opts">
+          <label><input type="radio" name="q3" value="〜1,124円">〜1,124円</label>
+          <label><input type="radio" name="q3" value="1,125〜1,199円">1,125〜1,199円</label>
+          <label><input type="radio" name="q3" value="1,200円以上">1,200円以上</label>
+          <label><input type="radio" name="q3" value="月給制のみ">月給制のみ</label>
+        </div>
+      </div>
+      <div class="q yn">
+        <div class="qt"><span class="no">4</span>月給の方について、「月給÷月平均所定労働時間」が最低賃金を上回るか計算したことがありますか</div>
+        <div class="opts">
+          <label><input type="radio" name="q4" value="はい">はい</label>
+          <label><input type="radio" name="q4" value="いいえ">いいえ</label>
+          <label><input type="radio" name="q4" value="わからない">わからない</label>
+        </div>
+      </div>
+      <div class="q yn">
+        <div class="qt"><span class="no">5</span>残業代の単価を、10月分から計算し直しましたか</div>
+        <div class="opts">
+          <label><input type="radio" name="q5" value="はい">はい</label>
+          <label><input type="radio" name="q5" value="いいえ">いいえ</label>
+          <label><input type="radio" name="q5" value="わからない">わからない</label>
+        </div>
+      </div>
+      <div class="q yn">
+        <div class="qt"><span class="no">6</span>賃金規程・賃金テーブルの見直しは済んでいますか</div>
+        <div class="opts">
+          <label><input type="radio" name="q6" value="はい">はい</label>
+          <label><input type="radio" name="q6" value="いいえ">いいえ</label>
+          <label><input type="radio" name="q6" value="わからない">わからない</label>
+        </div>
+      </div>
+      <div class="q yn">
+        <div class="qt"><span class="no">7</span>賃上げにあわせて使える可能性のある助成金（業務改善助成金など）を確認しましたか</div>
+        <div class="opts">
+          <label><input type="radio" name="q7" value="はい">はい</label>
+          <label><input type="radio" name="q7" value="いいえ">いいえ</label>
+          <label><input type="radio" name="q7" value="わからない">わからない</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-t">■ 診断結果のお届け先</div>
+    <div class="qbox" style="padding:4px 12px 14px">
+      <div class="field">
+        <label class="fl" for="sc-company">会社名<span class="req">（必須・個人事業主の方は屋号）</span></label>
+        <input type="text" id="sc-company" autocomplete="organization" placeholder="例）株式会社◯◯">
+        <p class="err" id="err-company">会社名（または屋号）をご入力ください。</p>
+      </div>
+      <div class="field">
+        <label class="fl" for="sc-name">お名前<span class="req">（必須）</span></label>
+        <input type="text" id="sc-name" autocomplete="name" placeholder="例）足利 太郎">
+        <p class="err" id="err-name">お名前をご入力ください。</p>
+      </div>
+      <div class="field">
+        <label class="fl" for="sc-tel">お電話番号<span class="req">（必須）</span></label>
+        <input type="tel" id="sc-tel" autocomplete="tel" placeholder="例）0284-00-0000">
+        <p class="err" id="err-tel">お電話番号をご入力ください。</p>
+      </div>
+      <div class="field">
+        <label class="fl" for="sc-mail">メールアドレス<span class="req">（必須・診断結果の送付先）</span></label>
+        <input type="email" id="sc-mail" autocomplete="email" placeholder="例）info@example.co.jp">
+        <p class="err" id="err-mail">正しいメールアドレスをご入力ください。</p>
+      </div>
+      <div class="hp" aria-hidden="true"><label>この欄は空のままにしてください<input type="text" name="company_url" tabindex="-1" autocomplete="off"></label></div>
+      <label class="consent">
+        <input type="checkbox" id="sc-agree">
+        <span>送信いただくと、診断結果のご連絡とあわせて、IBSグループのお役立ち情報（実務メール便・月2回程度）をメールでお届けします。配信はいつでも停止できます。<a href="https://ibsconsulting.jp/401k/privacy-policy/" target="_blank" rel="noopener">プライバシーポリシー</a>に同意のうえ、チェックを入れてください。<b style="color:var(--err)">（必須）</b></span>
+      </label>
+      <p class="err" id="err-agree">ご同意のうえチェックを入れてください。</p>
+      <p class="err" id="err-q">未回答の設問があります。7問すべてにお答えください。</p>
+      <div class="top-err" id="scTopErr"></div>
+      <button type="submit" class="submit" id="scSubmit">セルフチェックを送信する（無料）<small>＼ 3営業日以内（目安）に診断結果レポートをお送りします ／</small></button>
+      <p class="priv">ご入力情報は診断結果の送付・ご連絡、及びお役立ち情報の配信に利用し、第三者へ提供しません。配信は各メール内のリンク等でいつでも停止できます。</p>
+    </div>
+  </form>
+
+  <div class="thanks" id="scThanks" role="status" aria-live="polite">
+    <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5 11-11"/></svg></div>
+    <h3>ご回答ありがとうございます</h3>
+    <p>ご回答を受け付けました。担当者が拝見し、<b>3営業日以内（目安）に診断結果レポート</b>をメールでお送りします。</p>
+    <p style="font-size:12.5px;color:#5f7186;margin-top:6px">（お届け先：<span id="scThMail" style="font-weight:800"></span>）</p>
+    <p style="font-size:12px;color:#5f7186;margin-top:10px">※ 届かない場合は迷惑メール／プロモーションフォルダをご確認ください。</p>
+    <a class="tel" href="tel:0120100299">お急ぎの方は 0120-100-299</a>
+    <p class="tel-note">IBSグループ フリーダイヤル（受付 9:00〜19:00／平日）</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbziZQDyG7CUrOwx-YKEdNj63-uuGMlfNvtYpMrtRBYyanQ3u5sFJrV9vXwvITB4s2apAw/exec'; // S4捕捉フォームGAS（全磁石共有・2026-10-01 v8）
+  var MAGNET = 'saitei-check-202610';
+  var CONSENT_VER = 'saitei-check-2026-10';
+
+  var form = document.getElementById('scForm');
+
+  function qp(name){ try{ return new URLSearchParams(location.search).get(name)||''; }catch(e){ return ''; } }
+
+  // ---- 回答の収集（器のcollect()と同型・answers.q1〜q7）----
+  function collect(){
+    var a = {};
+    for(var n = 1; n <= 7; n++){
+      var els = form.querySelectorAll('input[name=q' + n + ']:checked');
+      if(els.length){ a['q' + n] = Array.prototype.map.call(els, function(e){ return e.value; }).join('・'); }
+    }
+    return a;
+  }
+  function qComplete(a){ for(var n = 1; n <= 7; n++){ if(!a['q' + n]) return false; } return true; }
+
+  // ---- 計測用（器と同型。基礎タグは本番接続時に器と同型で追加）----
+  function uuid(){ try{ return crypto.randomUUID(); }catch(e){ return 'sc-' + Date.now() + '-' + Math.random().toString(16).slice(2); } }
+  function cookie(name){ try{ var m = document.cookie.match('(^|;)\\s*' + name + '=([^;]+)'); return m ? decodeURIComponent(m[2]) : ''; }catch(e){ return ''; } } // Cookie無効環境でthrowしても送信を止めない（2026-10-01実測で検出）
+
+  var btn = document.getElementById('scSubmit'), topErr = document.getElementById('scTopErr'), sent = false;
+  function showTop(msg){ topErr.textContent = msg; topErr.style.display = 'block'; postH(); }
+  function reset(msg){ sent = false; btn.disabled = false; btn.textContent = '再送信する'; showTop(msg); }
+  function success(mail, eid){
+    try{ if(typeof gtag === 'function'){ gtag('event','generate_lead',{ lead_magnet:MAGNET, method:'saitei_check_form', value:1 }); }
+         else { (window.dataLayer = window.dataLayer || []).push({ event:'generate_lead', lead_magnet:MAGNET, method:'saitei_check_form' }); } }catch(e){}
+    try{ if(typeof fbq === 'function'){ fbq('track','Lead',{ content_name:MAGNET }, { eventID: eid }); } }catch(e){}
+    document.getElementById('scThMail').textContent = mail;
+    document.getElementById('scWrap').classList.add('done');
+    try{ document.getElementById('scWrap').scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){}
+    postH();
+  }
+
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    if(sent) return;
+    topErr.style.display = 'none';
+
+    var mail = document.getElementById('sc-mail').value.trim();
+    var tel = document.getElementById('sc-tel').value.trim();
+    var company = document.getElementById('sc-company').value.trim();
+    var name = document.getElementById('sc-name').value.trim();
+    var agree = document.getElementById('sc-agree').checked;
+    var hp = form.querySelector('input[name=company_url]').value;
+    var answers = collect();
+
+    var ok = true;
+    function flag(id, bad){ document.getElementById(id).style.display = bad ? 'block' : 'none'; if(bad) ok = false; }
+    flag('err-company', !company);
+    flag('err-name', !name);
+    flag('err-tel', !/^[0-9()+\-\s]{10,}$/.test(tel));
+    flag('err-mail', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail));
+    flag('err-agree', !agree);
+    flag('err-q', !qComplete(answers));
+    if(!ok){ showTop('未入力・未回答の項目があります。赤字の箇所をご確認ください。'); return; }
+    if(hp){ return; }
+
+    var eid = uuid();
+    var payload = {
+      magnet: MAGNET, mail: mail, name: name,
+      company: company, tel: tel, answers: answers,
+      agree: true, consentVer: CONSENT_VER,
+      consentText: '送信により、診断結果のご連絡＋IBSグループのお役立ち情報（実務メール便・月2回程度）の配信に同意（配信はいつでも停止できます）',
+      pageUrl: location.href, referrer: document.referrer || '', ua: navigator.userAgent || '',
+      utm_source: qp('utm_source'), utm_medium: qp('utm_medium'), utm_campaign: qp('utm_campaign'),
+      ts_client: new Date().toISOString(),
+      event_id: eid, fbp: cookie('_fbp'), fbc: cookie('_fbc')
+    };
+
+    sent = true; btn.disabled = true; btn.textContent = '送信中…';
+    var settled = false;
+    function finish(ok2, msg){ if(settled) return; settled = true; if(ok2){ success(mail, eid); } else { reset(msg); } }
+    if(ENDPOINT === 'ENDPOINT_URL_HERE'){
+      // 静的ダミー：ENDPOINT差し替えまで本番に送信しない（サンクス画面の動作確認用）
+      setTimeout(function(){ finish(true); }, 600);
+    } else {
+      fetch(ENDPOINT, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload)})
+        .then(function(){ finish(true); })
+        .catch(function(){ finish(false, '送信できませんでした。時間をおいて再度お試しください（お急ぎは 0120-100-299）。'); });
+      setTimeout(function(){ finish(true); }, 2000);
+    }
+  });
+
+  // ---- iframe自動リサイズ（器と同型・キーのみ本LP用）----
+  function postH(){ try{ parent.postMessage({ ibsSaiteiHeight: document.body.scrollHeight }, '*'); }catch(e){} }
+  window.addEventListener('load', postH);
+  window.addEventListener('resize', postH);
+  setTimeout(postH, 300); setTimeout(postH, 1200);
+})();
+</script>
+</body>
+</html>
+<!-- build 20261001 静的ダミー初版: 器=_ref_shindan_live.html にパレット・タイポ・配線（POSTキー構成/ハニーポット/同意必須/サンクス.done切替/ENDPOINT定数）準拠。送信は未接続（ENDPOINT_URL_HERE）。GA4/Meta基礎タグは本番接続時に器と同型で追加。 -->
