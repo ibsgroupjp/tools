@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IBS実務メール便｜IBSグループ</title>
+<!--
+  IBS実務メール便 登録ページ（静的ダミー・S4系）
+  ・器＝_ref_shindan_live.html（本番診断フォーム）。CSSパレット・タイポ・フォーム配線を同型で踏襲。
+  ・送信先=ENDPOINT定数（現在はプレースホルダ 'ENDPOINT_URL_HERE'＝本番GASにはまだ飛ばさない）。
+  ・payloadは器と同じキー構成（magnet/mail/agree/consentVer/consentText/pageUrl/referrer/ua/
+    utm_*/ts_client/event_id/fbp/fbc＋本ページ固有のattr）。ハニーポット=company_url（器と同型）。
+  ・同意はチェックボックスを置かず、送信ボタン直上の明示文言＋送信で成立（agree:trueを同梱）。
+  ・GA4/Meta Pixelの基礎タグは静的ダミー段階では非搭載（ローカルで開いただけで本番プロパティに
+    計測が飛ぶのを避けるため）。本番化の際に器と同型で追加する。
+  ・iframe設置時の自動リサイズ=ibsMailbinHeight（診断のibsShindanHeightと同型・キーのみ別）。
+-->
+<style>
+  :root{ --navy:#002060; --cyan:#0098E0; --gold:#FFC000; --ink:#333333; --pale:#EAF6FD; --line:#C9DCE8; --err:#c0392b; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{ font-family:"Yu Gothic","游ゴシック",YuGothic,Meiryo,sans-serif; color:var(--ink); background:#fff; line-height:1.7; }
+  .wrap{ max-width:720px; margin:0 auto; padding:8px 16px 28px; }
+  .head{ background:var(--navy); color:#fff; border-radius:10px; padding:18px 20px; margin-bottom:14px; }
+  .head .badge{ display:inline-block; background:var(--gold); color:var(--navy); font-weight:800; font-size:12px; padding:2px 12px; border-radius:3px; margin-bottom:6px; }
+  .head h1{ font-size:22px; line-height:1.4; }
+  .head p{ font-size:13px; color:#CFE6F7; margin-top:4px; }
+  .sec-t{ background:var(--navy); color:#fff; font-weight:700; font-size:14px; padding:6px 12px; border-radius:6px 6px 0 0; margin-top:18px; }
+  .qbox{ border:1px solid var(--line); border-top:none; border-radius:0 0 6px 6px; }
+  .item{ padding:10px 12px; border-bottom:1px solid var(--line); display:flex; gap:10px; align-items:flex-start; }
+  .item:last-child{ border-bottom:none; }
+  .item .no{ flex:none; width:24px; height:24px; border-radius:50%; background:var(--cyan); color:#fff; font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; margin-top:3px; }
+  .item .it{ font-size:14px; font-weight:700; color:var(--navy); }
+  .item .ib{ font-size:13px; }
+  .q{ padding:10px 12px; }
+  .q .qt{ font-size:14px; font-weight:700; color:var(--navy); margin-bottom:6px; }
+  .q .qt .req{ color:var(--err); font-size:11px; margin-left:6px; }
+  .opts{ display:flex; flex-wrap:wrap; gap:6px; }
+  .opts label{ display:inline-flex; align-items:center; gap:4px; border:1.5px solid var(--line); border-radius:999px; padding:5px 14px; font-size:13px; cursor:pointer; user-select:none; }
+  .opts input{ accent-color:var(--cyan); }
+  .opts label:has(input:checked){ border-color:var(--cyan); background:var(--pale); font-weight:700; }
+  input[type=email]{ width:100%; border:1.5px solid var(--line); border-radius:6px; padding:9px 12px; font-size:15px; font-family:inherit; }
+  input:focus{ outline:2px solid var(--cyan); border-color:var(--cyan); }
+  .field{ margin-top:12px; }
+  .field .fl{ display:block; font-size:13px; font-weight:700; color:var(--navy); margin-bottom:3px; }
+  .field .fl .req{ color:var(--err); font-size:11px; margin-left:6px; }
+  .consent{ font-size:12.5px; margin-top:14px; background:var(--pale); border-radius:6px; padding:10px 12px; }
+  .consent a{ color:var(--navy); font-weight:700; }
+  .err{ color:var(--err); font-size:12px; display:none; margin-top:3px; }
+  .top-err{ display:none; background:#FDEDEC; color:var(--err); border:1px solid var(--err); border-radius:6px; padding:9px 12px; font-size:13px; margin-top:12px; }
+  .submit{ display:block; width:100%; margin-top:16px; background:var(--gold); color:var(--navy); border:none; border-radius:999px; font-family:inherit; font-size:17px; font-weight:800; padding:14px; cursor:pointer; }
+  .submit:disabled{ opacity:.6; cursor:default; }
+  .submit small{ display:block; font-size:11px; font-weight:700; }
+  .hp{ position:absolute; left:-9999px; top:-9999px; height:1px; overflow:hidden; }
+  .thanks{ display:none; text-align:center; padding:36px 16px; }
+  .done .thanks{ display:block; }
+  .done form, .done .head p, .done .benefits{ display:none; }
+  .thanks .ic{ width:52px; height:52px; border-radius:50%; background:var(--cyan); margin:0 auto 12px; display:flex; align-items:center; justify-content:center; }
+  .thanks h3{ color:var(--navy); font-size:19px; margin-bottom:8px; }
+  .thanks p{ font-size:14px; }
+  .thanks .mailline{ font-size:12.5px; color:#5f7186; margin-top:8px; }
+  .thanks .tel{ display:inline-block; margin-top:14px; background:var(--navy); color:#fff; text-decoration:none; font-weight:800; padding:11px 24px; border-radius:999px; font-size:15px; }
+  .thanks .telnote{ font-size:12px; color:#5f7186; margin-top:6px; }
+</style>
+</head>
+<body>
+<div class="wrap" id="mbWrap">
+  <div class="head">
+    <span class="badge">無料・月2回程度</span>
+    <h1>IBS実務メール便</h1>
+    <p>人事労務・給与・助成金の「実務で使える」情報だけを、月2回程度、メールでお届けします。読み物ではなく、そのまま社内で使える形でまとめています。</p>
+  </div>
+
+  <div class="benefits">
+    <div class="sec-t">■ お届けする内容</div>
+    <div class="qbox">
+      <div class="item"><span class="no">1</span><div><div class="it">法改正の実務対応</div><div class="ib">何を・いつまでに・どこまで対応するか、実務の段取りでお伝えします。</div></div></div>
+      <div class="item"><span class="no">2</span><div><div class="it">助成金・補助金の締切と使いどころ</div><div class="ib">申請の締切と、どのような会社で使いやすいかを短くご案内します。</div></div></div>
+      <div class="item"><span class="no">3</span><div><div class="it">給与計算・社会保険の実務ポイント</div><div class="ib">毎月の給与計算や社会保険の手続きで迷いやすい点を取り上げます。</div></div></div>
+    </div>
+  </div>
+
+  <form id="mbForm" novalidate>
+    <div class="sec-t">■ ご登録はこちら</div>
+    <div class="qbox" style="padding:4px 12px 14px">
+      <div class="field">
+        <label class="fl" for="mb-mail">メールアドレス<span class="req">（必須）</span></label>
+        <input type="email" id="mb-mail" autocomplete="email" placeholder="例）info@example.co.jp">
+        <p class="err" id="err-mail">正しいメールアドレスをご入力ください。</p>
+      </div>
+      <div class="q" style="padding:12px 0 0">
+        <div class="qt">あなたのお立場は？<span class="req">（必須）</span></div>
+        <div class="opts">
+          <label><input type="radio" name="attr" value="経営者・役員">経営者・役員</label>
+          <label><input type="radio" name="attr" value="人事・労務などのご担当者">人事・労務などのご担当者</label>
+          <label><input type="radio" name="attr" value="従業員・その他">従業員・その他</label>
+        </div>
+        <p class="err" id="err-attr">お立場をお選びください。</p>
+      </div>
+      <div class="hp" aria-hidden="true"><label>この欄は空のままにしてください<input type="text" name="company_url" tabindex="-1" autocomplete="off"></label></div>
+      <div class="consent">IBS実務メール便（月2回程度）をお届けします。内容は、人事労務・給与・助成金などの実務情報と、IBSグループからのご案内（セミナー・サービス等）です。送信をもって配信に同意いただいたものとします。配信は、お届けするメール内のリンクからいつでも停止できます。<br><a href="https://ibsconsulting.jp/401k/privacy-policy/" target="_blank" rel="noopener">プライバシーポリシー</a></div>
+      <div class="top-err" id="mbTopErr"></div>
+      <button type="submit" class="submit" id="mbSubmit">登録する（無料）<small>＼ ご登録のアドレスに確認メールをお送りします ／</small></button>
+    </div>
+  </form>
+
+  <div class="thanks" id="mbThanks" role="status" aria-live="polite">
+    <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5 11-11"/></svg></div>
+    <h3>ご登録ありがとうございます</h3>
+    <p>確認メールをお送りしました。<br>メール内の『登録を完了する』リンクを押していただくと、配信が始まります。</p>
+    <p>メールが届かない場合は、迷惑メールフォルダをご確認ください。</p>
+    <p class="mailline">ご登録のメールアドレス：<b id="mbThMail"></b></p>
+    <a class="tel" href="tel:0120100299">IBSグループ フリーダイヤル 0120-100-299</a>
+    <p class="telnote">（受付 9:00〜19:00／平日）</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbziZQDyG7CUrOwx-YKEdNj63-uuGMlfNvtYpMrtRBYyanQ3u5sFJrV9vXwvITB4s2apAw/exec'; // S4捕捉フォームGAS（全磁石共有・2026-10-01 v8）
+  var MAGNET = 'jitsumu-mailbin';
+  var CONSENT_VER = 'mailbin-2026-10';
+  var CONSENT_TEXT = 'IBS実務メール便（月2回程度）をお届けします。内容は、人事労務・給与・助成金などの実務情報と、IBSグループからのご案内（セミナー・サービス等）です。送信をもって配信に同意いただいたものとします。配信は、お届けするメール内のリンクからいつでも停止できます。';
+
+  function qp(name){ try{ return new URLSearchParams(location.search).get(name)||''; }catch(e){ return ''; } }
+  function uuid(){ try{ return crypto.randomUUID(); }catch(e){ return 'mb-' + Date.now() + '-' + Math.random().toString(16).slice(2); } }
+  function cookie(name){ try{ var m = document.cookie.match('(^|;)\\s*' + name + '=([^;]+)'); return m ? decodeURIComponent(m[2]) : ''; }catch(e){ return ''; } } // Cookie無効環境でthrowしても送信を止めない（2026-10-01実測で検出）
+
+  var form = document.getElementById('mbForm');
+  var btn = document.getElementById('mbSubmit'), topErr = document.getElementById('mbTopErr'), sent = false;
+  function showTop(msg){ topErr.textContent = msg; topErr.style.display = 'block'; postH(); }
+  function reset(msg){ sent = false; btn.disabled = false; btn.textContent = '再送信する'; showTop(msg); }
+  function success(mail){
+    document.getElementById('mbThMail').textContent = mail;
+    document.getElementById('mbWrap').classList.add('done');
+    try{ document.getElementById('mbWrap').scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){}
+    postH();
+  }
+
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    if(sent) return;
+    topErr.style.display = 'none';
+
+    var mail = document.getElementById('mb-mail').value.trim();
+    var attrEl = form.querySelector('input[name=attr]:checked');
+    var attr = attrEl ? attrEl.value : '';
+    var hp = form.querySelector('input[name=company_url]').value;
+
+    var ok = true;
+    function flag(id, bad){ document.getElementById(id).style.display = bad ? 'block' : 'none'; if(bad) ok = false; }
+    flag('err-mail', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail));
+    flag('err-attr', !attr);
+    if(!ok){ postH(); return; }
+    if(hp){ return; }
+
+    var eid = uuid();
+    var payload = {
+      magnet: MAGNET, mail: mail, attr: attr,
+      agree: true, consentVer: CONSENT_VER,
+      consentText: CONSENT_TEXT,
+      pageUrl: location.href, referrer: document.referrer || '', ua: navigator.userAgent || '',
+      utm_source: qp('utm_source'), utm_medium: qp('utm_medium'), utm_campaign: qp('utm_campaign'),
+      ts_client: new Date().toISOString(),
+      event_id: eid, fbp: cookie('_fbp'), fbc: cookie('_fbc')
+    };
+
+    sent = true; btn.disabled = true; btn.textContent = '送信中…';
+    var settled = false;
+    function finish(ok2, msg){ if(settled) return; settled = true; if(ok2){ success(mail); } else { reset(msg); } }
+    if(ENDPOINT === 'ENDPOINT_URL_HERE'){
+      // 静的ダミー：ENDPOINT差し替えまで本番に送信しない（サンクス画面の動作確認用）
+      setTimeout(function(){ finish(true); }, 600);
+    } else {
+      fetch(ENDPOINT, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload)})
+        .then(function(){ finish(true); })
+        .catch(function(){ finish(false, '送信できませんでした。時間をおいて再度お試しください（お急ぎは 0120-100-299）。'); });
+      setTimeout(function(){ finish(true); }, 2000);
+    }
+  });
+
+  // ---- iframe自動リサイズ（診断フォームと同型・キーのみ本ページ固有）----
+  function postH(){ try{ parent.postMessage({ ibsMailbinHeight: document.body.scrollHeight }, '*'); }catch(e){} }
+  window.addEventListener('load', postH);
+  window.addEventListener('resize', postH);
+  setTimeout(postH, 300); setTimeout(postH, 1200);
+})();
+</script>
+</body>
+</html>
+<!-- build 20261001 初稿（静的ダミー）: 器=_ref_shindan_live.html のパレット/タイポ/配線を踏襲。ENDPOINTはプレースホルダ・GA4/Pixel非搭載（本番化時に器と同型で追加）。 -->
