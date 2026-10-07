@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>メルマガの承認｜IBSグループ</title>
+<style>
+  :root { --ink:#15293D; --brand:#009FE6; --muted:#5f7186; --line:#d0d7de; --bg:#ffffff; --panel:#fafbfc; --red:#C00000; --redbg:#fde8e8; --amber:#e0a000; --amberbg:#fff6e0; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:"Meiryo UI","Hiragino Sans",sans-serif; line-height:1.8; }
+  main { max-width:640px; margin:0 auto; padding:16px; }
+  h1 { color:var(--brand); font-size:20px; margin:8px 0 12px; }
+  .meta { margin:4px 0; font-size:15px; }
+  .box { white-space:pre-wrap; word-break:break-word; border:1px solid var(--line); border-radius:6px; padding:12px; font-size:15px; background:var(--panel); }
+  .ng { background:var(--redbg); border-left:4px solid var(--red); padding:8px 12px; margin:12px 0; }
+  .wa { background:var(--amberbg); border-left:4px solid var(--amber); padding:8px 12px; margin:12px 0; }
+  .ng b { color:var(--red); }
+  ul { margin:4px 0; padding-left:20px; }
+  .note { font-size:13px; color:var(--muted); }
+  .btns { margin:16px 0; display:flex; flex-wrap:wrap; gap:12px; }
+  button { font-size:17px; padding:12px 22px; border-radius:6px; cursor:pointer; font-family:inherit; }
+  #ok { background:var(--brand); color:#fff; border:0; }
+  #ok:disabled { background:#9ccfe8; cursor:not-allowed; }
+  #ng { background:#fff; color:var(--ink); border:1px solid #9aa7b4; }
+  #ng2 { background:var(--red); color:#fff; border:0; display:none; }
+  #msg { font-weight:bold; font-size:16px; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>メルマガの承認</h1>
+  <p id="state" class="meta">読み込んでいます…</p>
+  <section id="view" class="hidden">
+    <p class="meta">号ID：<span id="vid"></span><br>対象：<span id="vseg"></span>（送信予定 約<b id="vcount"></b> 件・承認した時点で確定）</p>
+    <p class="meta">件名：<b id="vsub"></b></p>
+    <div id="vhard" class="ng hidden"><b>このままでは送れません</b><ul id="vhardl"></ul>配信キューの本文を直すと、このページで承認できるようになります（ページを開き直してください）。</div>
+    <div id="vwarn" class="wa hidden"><b>確認してください</b><ul id="vwarnl"></ul></div>
+    <div id="vbody" class="box"></div>
+    <p class="note">※ 発行者表示・配信停止リンクは送信時に自動で付きます。送信は平日（祝日・年末年始を除く）10時〜18時に1時間おきの自動処理で行います。夜・休日に承認した場合は次の平日の10時台です。</p>
+    <div id="btns" class="btns">
+      <button id="ok" type="button">承認する</button>
+      <button id="ng" type="button">この号は送らない</button>
+      <button id="ng2" type="button">本当に送らない（中止にする）</button>
+    </div>
+  </section>
+  <p id="msg"></p>
+  <p class="note">IBSグループ（IBSコンサルティング株式会社）</p>
+</main>
+<script>
+(function(){
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbw6HV-ouserGk74YmiV3t-qbbSGXvjerq2V9BiDTlgvwIZTQTTbUN83HiSZmtY7niM8/exec';
+  var q = new URLSearchParams(location.search);
+  var ap = q.get('ap') || '', s = q.get('s') || '';
+  var $ = function(id){ return document.getElementById(id); };
+  function call(op){
+    return fetch(ENDPOINT, { method:'POST', credentials:'omit', redirect:'follow',
+      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify({ ap:ap, s:s, op:op }) }).then(function(r){ return r.json(); });
+  }
+  function fill(ul, arr){ ul.textContent = ''; arr.forEach(function(t){ var li = document.createElement('li'); li.textContent = t; ul.appendChild(li); }); }
+  function act(op){
+    $('btns').classList.add('hidden'); $('msg').textContent = '処理中…';
+    call(op).then(function(r){
+      if(r && r.ok){ $('msg').textContent = r.message || '完了しました。'; }
+      else { $('msg').textContent = 'エラー：' + ((r && r.error) || '不明'); $('btns').classList.remove('hidden'); }
+    }).catch(function(e){ $('msg').textContent = '通信エラー：' + e + '（少しおいて、もう一度押してください）'; $('btns').classList.remove('hidden'); });
+  }
+  if(!ap || !s){ $('state').textContent = 'リンクが正しくありません。Chatworkの通知のリンクから開いてください。'; return; }
+  call('view').then(function(r){
+    if(!r || !r.ok){ $('state').textContent = (r && r.error) || '読み込めませんでした'; return; }
+    $('vid').textContent = r.id; $('vseg').textContent = r.seg; $('vsub').textContent = r.subject; $('vbody').textContent = r.body;
+    if(r.status !== '下書き'){
+      $('state').textContent = 'この号は承認できる状態ではありません（現在の状態：' + r.status + '）';
+      $('vcount').textContent = '-'; $('btns').classList.add('hidden'); $('view').classList.remove('hidden'); return;
+    }
+    $('state').textContent = '';
+    $('vcount').textContent = r.count;
+    if(r.hard && r.hard.length){ fill($('vhardl'), r.hard); $('vhard').classList.remove('hidden'); }
+    if(r.warn && r.warn.length){ fill($('vwarnl'), r.warn); $('vwarn').classList.remove('hidden'); }
+    $('ok').disabled = !r.approvable;
+    $('view').classList.remove('hidden');
+  }).catch(function(e){ $('state').textContent = '通信エラー：' + e + '（少しおいて開き直してください）'; });
+  $('ok').onclick = function(){ act('approve'); };
+  $('ng').onclick = function(){ this.style.display = 'none'; $('ng2').style.display = 'inline-block'; };
+  $('ng2').onclick = function(){ act('cancel'); };
+})();
+</script>
+</body>
+</html>
