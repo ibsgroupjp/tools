@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google tag (gtag.js)｜2026-10-20 見積ナビの計測。/price/ に埋め込まれている時は page_view を送らない（診断フォームと同じ作り）。送信は常に generate_lead -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-77H76CX7YF"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-77H76CX7YF',{send_page_view:window.self===window.top});</script>
 <title>IBS 見積ナビ｜顧問プラン診断＆概算見積もり</title>
 <style>
   :root{
@@ -454,6 +457,7 @@ function submitQuote(){
   if(typeof ENDPOINT!=='undefined' && ENDPOINT){
     fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}).catch(function(err){console.warn('送信エラー',err);});
   }
+  try{ if(typeof gtag==='function'){ gtag('event','generate_lead',{lead_magnet:'quote-navi',method:'quote_navi',value:1}); } }catch(e){}
   var ty=document.getElementById('thanks'); if(ty) ty.style.display='block';
   document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'});
 }
