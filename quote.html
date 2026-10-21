@@ -100,6 +100,7 @@
   .cta{margin-top:13px;background:linear-gradient(105deg,var(--navy),var(--blue-d));color:#fff;
     border-radius:11px;padding:15px 16px;text-align:center;}
   .cta .free{font-size:23px;font-weight:800;letter-spacing:.05em;}
+  .cta .free a{color:inherit;text-decoration:none;}
   .cta .sm{font-size:12px;opacity:.9;}
   .memo{margin-top:14px;background:#fff8ec;border:1px dashed #e3b863;border-radius:10px;padding:12px 15px;}
   .memo .mh{font-size:12px;font-weight:800;color:#9a6a12;margin-bottom:6px;}
@@ -279,7 +280,7 @@
 
       <div class="cta">
         <div>まずは無料相談から。</div>
-        <div class="free">📞 0120-100-299</div>
+        <div class="free">📞 <a href="tel:0120100299">0120-100-299</a></div>
         <div class="sm">IBSグループ（IBSコンサルティング株式会社・IBS社労士事務所）／ TEL 0284-63-3883</div>
       </div>
 
@@ -479,3 +480,4 @@ window.addEventListener('load',postHeight);
 </script>
 </body>
 </html>
+<!-- build 20261021 電話のタップ発信: 結果欄の 0120-100-299 を a[href="tel:0120100299"] に（表記・主体は不変。FAX/固定番号は対象外）。GA4・料金ロジック・送信先は不変。 -->
