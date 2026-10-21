@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Google tag (gtag.js)｜2026-10-21 メール便の計測。単体表示（window.self===window.top）のときだけ page_view を送る＝見積ナビ・診断フォームと同じ作り。登録送信時に generate_lead（method:'mailbin_form'・lead_magnet）を送る -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-77H76CX7YF"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-77H76CX7YF',{send_page_view:window.self===window.top});</script>
 <title>IBS実務メール便｜IBSグループ</title>
 <!--
   IBS実務メール便 登録ページ（静的ダミー・S4系）
@@ -130,6 +133,7 @@
   function showTop(msg){ topErr.textContent = msg; topErr.style.display = 'block'; postH(); }
   function reset(msg){ sent = false; btn.disabled = false; btn.textContent = '再送信する'; showTop(msg); }
   function success(mail){
+    try{ if(typeof gtag === 'function'){ gtag('event','generate_lead',{ lead_magnet:MAGNET, method:'mailbin_form', value:1 }); } }catch(e){}
     document.getElementById('mbThMail').textContent = mail;
     document.getElementById('mbWrap').classList.add('done');
     try{ document.getElementById('mbWrap').scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){}
@@ -188,3 +192,4 @@
 </body>
 </html>
 <!-- build 20261001 初稿（静的ダミー）: 器=_ref_shindan_live.html のパレット/タイポ/配線を踏襲。ENDPOINTはプレースホルダ・GA4/Pixel非搭載（本番化時に器と同型で追加）。 -->
+<!-- build 20261021 GA4計測: gtag.jsローダ＋config G-77H76CX7YF（send_page_view=window.self===window.top）を<head>に追加、登録送信の成功時に generate_lead(method:mailbin_form, lead_magnet:jitsumu-mailbin) を送る。フォーム・ENDPOINT・文言は不変。 -->
