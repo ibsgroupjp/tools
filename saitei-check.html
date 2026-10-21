@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Google tag (gtag.js)｜2026-10-21 セルフチェックの計測。単体表示（window.self===window.top）のときだけ page_view を送る＝見積ナビ・診断フォームと同じ作り。送信時の generate_lead（method:'saitei_check_form'・lead_magnet）は既存のまま -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-77H76CX7YF"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-77H76CX7YF',{send_page_view:window.self===window.top});</script>
 <title>最低賃金の10月改定 実務セルフチェック｜IBSグループ</title>
 <!--
   IBS 最低賃金10月改定セルフチェックLP（静的ダミー）
@@ -277,3 +280,4 @@
 </body>
 </html>
 <!-- build 20261001 静的ダミー初版: 器=_ref_shindan_live.html にパレット・タイポ・配線（POSTキー構成/ハニーポット/同意必須/サンクス.done切替/ENDPOINT定数）準拠。送信は未接続（ENDPOINT_URL_HERE）。GA4/Meta基礎タグは本番接続時に器と同型で追加。 -->
+<!-- build 20261021 GA4計測: gtag.jsローダ＋config G-77H76CX7YF（send_page_view=window.self===window.top）を<head>に追加。generate_lead(method:saitei_check_form, lead_magnet)は既存のまま。フォーム・ENDPOINT・文言は不変。 -->
