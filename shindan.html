@@ -137,6 +137,8 @@
         <p class="err" id="err-mail">正しいメールアドレスをご入力ください。</p>
       </div>
       <div class="hp" aria-hidden="true"><label>この欄は空のままにしてください<input type="text" name="company_url" tabindex="-1" autocomplete="off"></label></div>
+      <!-- 流入元の引継ぎ欄（build 20261031）：送信payloadの utm_source / utm_medium / utm_campaign 等はこの欄から読む。値は下の ATTR 解決で入る -->
+      <input type="hidden" name="utm_source"><input type="hidden" name="utm_medium"><input type="hidden" name="utm_campaign"><input type="hidden" name="utm_content"><input type="hidden" name="utm_term"><input type="hidden" name="gclid"><input type="hidden" name="fbclid">
       <label class="consent">
         <input type="checkbox" id="sh-agree">
         <span><a href="https://ibsconsulting.jp/401k/privacy-policy/" target="_blank" rel="noopener">プライバシーポリシー</a>に同意し、診断結果レポートの送付、およびIBSグループからのお役立ち情報（法改正・労務等）の配信に同意します。<b style="color:var(--err)">（必須）</b></span>
@@ -291,9 +293,30 @@
 
   function qp(name){ try{ return new URLSearchParams(location.search).get(name)||''; }catch(e){ return ''; } }
   var MAGNET = qp('m');
+
+  // ---- 流入元（utm・gclid・fbclid）の引継ぎ（build 20261031）----
+  // 順序：①自分のURLのクエリ → ②埋め込み（iframe）のときだけ親ページのURL（document.referrer）のクエリ → ③空。①にある値は②で上書きしない。
+  // 注意：親（www.ibssr.jp）の Referrer-Policy がブラウザ既定（strict-origin-when-cross-origin）のままだと document.referrer はオリジンだけ＝②は空のまま。
+  //       親側で iframe に referrerpolicy="no-referrer-when-downgrade" を付ければ②で、iframe の src に親のクエリを足せば①で拾える（どちらもJimdo側の1行）。
+  var ATTR_KEYS = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','gclid','fbclid'];
+  var ATTR = {}, ATTR_FROM = '';
+  (function(){
+    var own = null, ref = null, fromSelf = false, fromParent = false;
+    try{ own = new URLSearchParams(location.search); }catch(e){}
+    try{ if(window.self !== window.top && document.referrer){ ref = new URL(document.referrer).searchParams; } }catch(e){}
+    ATTR_KEYS.forEach(function(k){
+      var v = own ? (own.get(k) || '') : '';
+      if(v){ fromSelf = true; }
+      else if(ref && ref.get(k)){ v = ref.get(k); fromParent = true; }
+      ATTR[k] = v;
+    });
+    ATTR_FROM = fromSelf ? 'self' : (fromParent ? 'parent' : '');
+  })();
   var cfg = CFG[MAGNET];
 
   var form = document.getElementById('shForm');
+  ATTR_KEYS.forEach(function(k){ var inp = form.querySelector('input[name="' + k + '"]'); if(inp && !inp.value){ inp.value = ATTR[k] || ''; } });
+  function hv(k){ var inp = form.querySelector('input[name="' + k + '"]'); return inp ? (inp.value || '') : (ATTR[k] || ''); }
   if(!cfg){ // 未定義 or 封印中（saiyo-rakuraku等）
     document.getElementById('shTitle').textContent = '診断のご案内';
     document.getElementById('shNotReady').style.display = 'block';
@@ -413,7 +436,8 @@
       agree: true, consentVer: CONSENT_VER,
       consentText: 'プライバシーポリシーに同意し、診断結果レポート送付＋IBSグループからのお役立ち情報（法改正・労務等）の配信に同意',
       pageUrl: location.href, referrer: document.referrer || '', ua: navigator.userAgent || '',
-      utm_source: qp('utm_source'), utm_medium: qp('utm_medium'), utm_campaign: qp('utm_campaign'),
+      utm_source: hv('utm_source'), utm_medium: hv('utm_medium'), utm_campaign: hv('utm_campaign'),
+      utm_content: hv('utm_content'), utm_term: hv('utm_term'), gclid: hv('gclid'), fbclid: hv('fbclid'), utm_from: ATTR_FROM,
       ts_client: new Date().toISOString(),
       event_id: eid, fbp: cookie('_fbp'), fbc: cookie('_fbc')
     };
@@ -442,3 +466,4 @@
 <!--   ※桶接続の本体はGAS側(IBS_捕捉フォーム_GAS.gs writeRow_)＝診断型は送信時に初回DL日時をセットしてシングルオプトイン化。要・新バージョン再デプロイ（正田ゲート）。 -->
 <!-- build 20260727 GA4計測修理: gtag.jsローダ＋config G-77H76CX7YF（リテラル）を<head>に追加。iframe二重計上回避=window.self===window.topでsend_page_view分岐。既存のgenerate_lead/fbq/フォーム/同意/ENDPOINTは不変。 -->
 <!-- build 20260728 Meta Pixel実装: fbevents.jsローダ＋fbq('init','27630244613253987')を<head>のGA4直後に追加。PageViewはwindow.self===window.topのときのみ（母艦親ページに同一Pixelが在る＝二重計上回避・実測済）。noscript版の1px imgは非搭載（iframe自動リサイズ保護）。既存のfbq('track','Lead',…,{eventID:eid})とeid生成・GA4・フォーム機能・ENDPOINT・他3診断は不変。 -->
+<!-- build 20261031 流入元の引継ぎ: hidden欄 utm_source/utm_medium/utm_campaign/utm_content/utm_term/gclid/fbclid を追加し、①自分のURL→②iframe時は親URL（document.referrer）→③空 の順で解決して入れる（①は②で上書きしない）。payload の既存欄名は不変（追加キー utm_content/utm_term/gclid/fbclid/utm_from は生JSONにのみ残る）。GA4/Pixel/ENDPOINT/同意/設問は不変。 -->
