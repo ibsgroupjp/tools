@@ -202,8 +202,8 @@
       ]
     },
     'joseikin-rakuraku': {
-      title:'らくらく助成金診断', noun:'助成金の活用',
-      eyebrow:'らくらく助成金診断｜中小企業の経営者の方へ',
+      title:'かんたん助成金診断', noun:'助成金の活用',
+      eyebrow:'かんたん助成金診断｜中小企業の経営者の方へ',
       h1:'その残業対策・賃上げ・人材育成、雇用関係の助成金の対象かもしれません。',
       lead:'「うちも対象？」には、20問・約5分の無料チェックでお答えします。取りこぼしがないか診断し、結果は社労士がレポートでお返しします。',
       chips:['回答は約5分','20問チェック式','診断結果レポート無料'],
@@ -262,7 +262,7 @@
       ]
     },
     'saiyo-rakuraku': {
-      title:'らくらく採用診断', noun:'採用活動の改善',
+      title:'かんたん採用診断', noun:'採用活動の改善',
       lead:'貴社の採用活動の現在の状況についてお答えください。「詰まりどころ」（母集団づくり・求人票・応募対応・面談・定着）を診断し、レポートをお返しします（回答約5分）。',
       attr:[
         {q:'貴社の業種は何ですか', type:'text'},
@@ -466,5 +466,5 @@
 <!--   ※桶接続の本体はGAS側(IBS_捕捉フォーム_GAS.gs writeRow_)＝診断型は送信時に初回DL日時をセットしてシングルオプトイン化。要・新バージョン再デプロイ（正田ゲート）。 -->
 <!-- build 20260727 GA4計測修理: gtag.jsローダ＋config G-77H76CX7YF（リテラル）を<head>に追加。iframe二重計上回避=window.self===window.topでsend_page_view分岐。既存のgenerate_lead/fbq/フォーム/同意/ENDPOINTは不変。 -->
 <!-- build 20260728 Meta Pixel実装: fbevents.jsローダ＋fbq('init','27630244613253987')を<head>のGA4直後に追加。PageViewはwindow.self===window.topのときのみ（母艦親ページに同一Pixelが在る＝二重計上回避・実測済）。noscript版の1px imgは非搭載（iframe自動リサイズ保護）。既存のfbq('track','Lead',…,{eventID:eid})とeid生成・GA4・フォーム機能・ENDPOINT・他3診断は不変。 -->
-<!-- build 20261106 診断2本の表示名を改名（正田裁定11/06）: kyuyo-rakuraku title→給与計算・総務丸投げ診断／keiei-kenshin title→社労士委託替え診断。識別子?m=・GAS・欄名は不変 -->
+<!-- build 20261106 診断2本の表示名を改名（正田裁定11/06）: kyuyo-rakuraku title→給与計算・総務丸投げ診断／keiei-kenshin title→社労士委託替え診断／joseikin-rakuraku title・eyebrow→かんたん助成金診断／saiyo-rakuraku title→かんたん採用診断。識別子?m=・GAS・欄名は不変 -->
 <!-- build 20261031 流入元の引継ぎ: hidden欄 utm_source/utm_medium/utm_campaign/utm_content/utm_term/gclid/fbclid を追加し、①自分のURL→②iframe時は親URL（document.referrer）→③空 の順で解決して入れる（①は②で上書きしない）。payload の既存欄名は不変（追加キー utm_content/utm_term/gclid/fbclid/utm_from は生JSONにのみ残る）。GA4/Pixel/ENDPOINT/同意/設問は不変。 -->
